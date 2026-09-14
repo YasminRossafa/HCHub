@@ -3,20 +3,22 @@ import { useMemo, useState } from 'react'
 import Button from '../components/Button'
 import CategoryCard from '../components/CategoryCard'
 import EmptyState from '../components/EmptyState'
+import LoadingScreen from '../components/LoadingScreen'
 import { CATEGORIES, CATEGORIES_BY_KEY } from '../constants/categories'
-import { getCertificates, getStudent } from '../services/storageService'
+import { useAuth } from '../contexts/AuthContext'
+import { getCertificates } from '../services/storageService'
 import { formatDate } from '../utils/date'
 import { generateReportPdf } from '../utils/pdf'
 import { getCategoryProgress, getOverallProgress, getValidatedCertificates } from '../utils/progress'
 import { buildShareableLink } from '../utils/shareLink'
 
 export default function Report() {
-  const [aluno] = useState(getStudent)
+  const { studentProfile: aluno } = useAuth()
+  // Certificates still live in localStorage; the student profile now comes from Firestore (see AuthContext).
   const [certificados] = useState(getCertificates)
   const validated = useMemo(() => getValidatedCertificates(certificados), [certificados])
   const hasValidated = validated.length > 0
 
-  const overall = getOverallProgress(aluno, certificados)
   const categoryBreakdown = useMemo(
     () => CATEGORIES.map((category) => ({ label: category.label, progress: getCategoryProgress(category.key, aluno, certificados) })),
     [aluno, certificados],
@@ -26,6 +28,11 @@ export default function Report() {
   const [pdfError, setPdfError] = useState(null)
   const [shareResult, setShareResult] = useState(null)
   const [copyLabel, setCopyLabel] = useState('Copiar')
+
+  // RequireStudent already guarantees a profile is loaded before this route renders; this is a defensive fallback.
+  if (!aluno) return <LoadingScreen />
+
+  const overall = getOverallProgress(aluno, certificados)
 
   async function handleGeneratePdf() {
     setIsGeneratingPdf(true)

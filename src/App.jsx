@@ -1,26 +1,78 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from './components/AppLayout'
+import LoadingScreen from './components/LoadingScreen'
+import { useAuth } from './contexts/AuthContext'
 import CertificateForm from './pages/CertificateForm'
 import Dashboard from './pages/Dashboard'
 import History from './pages/History'
+import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
 import ProfessorPanel from './pages/ProfessorPanel'
 import Report from './pages/Report'
-import { hasStudent } from './services/storageService'
+import Signup from './pages/Signup'
 
-function IndexRedirect() {
-  return <Navigate to={hasStudent() ? '/dashboard' : '/onboarding'} replace />
+/** Login/Signup: bounce a signed-in user back into the app rather than showing the auth form again. */
+function RedirectIfAuthed({ children }) {
+  const { user, authLoading } = useAuth()
+  if (authLoading) return <LoadingScreen />
+  if (user) return <Navigate to="/" replace />
+  return children
 }
 
+/** Onboarding: requires a session, but bounces a student who already has a profile straight to the dashboard. */
+function RequireOnboarding({ children }) {
+  const { user, authLoading, studentProfile, profileLoading } = useAuth()
+  if (authLoading) return <LoadingScreen />
+  if (!user) return <Navigate to="/login" replace />
+  if (profileLoading) return <LoadingScreen />
+  if (studentProfile) return <Navigate to="/dashboard" replace />
+  return children
+}
+
+/** Dashboard/Registration/History/Report/"/": requires both a session and a completed Firestore student profile. */
 function RequireStudent({ children }) {
-  return hasStudent() ? children : <Navigate to="/onboarding" replace />
+  const { user, authLoading, studentProfile, profileLoading } = useAuth()
+  if (authLoading || profileLoading) return <LoadingScreen />
+  if (!user) return <Navigate to="/login" replace />
+  if (!studentProfile) return <Navigate to="/onboarding" replace />
+  return children
 }
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<IndexRedirect />} />
-      <Route path="/onboarding" element={<Onboarding />} />
+      <Route
+        path="/"
+        element={
+          <RequireStudent>
+            <Navigate to="/dashboard" replace />
+          </RequireStudent>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <RedirectIfAuthed>
+            <Login />
+          </RedirectIfAuthed>
+        }
+      />
+      <Route
+        path="/cadastro"
+        element={
+          <RedirectIfAuthed>
+            <Signup />
+          </RedirectIfAuthed>
+        }
+      />
+      <Route
+        path="/onboarding"
+        element={
+          <RequireOnboarding>
+            <Onboarding />
+          </RequireOnboarding>
+        }
+      />
       <Route path="/painel" element={<ProfessorPanel />} />
       <Route
         element={

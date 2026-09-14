@@ -4,16 +4,20 @@ import { Link } from 'react-router-dom'
 import Button from '../components/Button'
 import CategoryCard from '../components/CategoryCard'
 import EmptyState from '../components/EmptyState'
+import LoadingScreen from '../components/LoadingScreen'
 import OverallProgressHero from '../components/OverallProgressHero'
 import { CATEGORIES } from '../constants/categories'
-import { getCertificates, getStudent } from '../services/storageService'
+import { useAuth } from '../contexts/AuthContext'
+import { getCertificates } from '../services/storageService'
 import { getCategoryProgress, getOverallProgress } from '../utils/progress'
 
 export default function Dashboard() {
-  const [aluno] = useState(getStudent)
+  const { studentProfile: aluno } = useAuth()
+  // Certificates still live in localStorage; the student profile now comes from Firestore (see AuthContext).
   const [certificados] = useState(getCertificates)
 
-  if (!aluno) return null
+  // RequireStudent already guarantees a profile is loaded before this route renders; this is a defensive fallback.
+  if (!aluno) return <LoadingScreen />
 
   const overall = getOverallProgress(aluno, certificados)
   const hasCertificates = certificados.length > 0
