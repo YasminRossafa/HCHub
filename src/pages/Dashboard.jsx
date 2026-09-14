@@ -7,10 +7,9 @@ import EmptyState from '../components/EmptyState'
 import LoadingScreen from '../components/LoadingScreen'
 import LoadingState from '../components/LoadingState'
 import OverallProgressHero from '../components/OverallProgressHero'
-import { CATEGORIES } from '../constants/categories'
 import { useAuth } from '../contexts/AuthContext'
 import { getCertificates } from '../firebase/certificateService'
-import { getCategoryProgress, getOverallProgress } from '../utils/progress'
+import { getActiveCategories, getCategoryProgress, getOverallProgress } from '../utils/progress'
 
 export default function Dashboard() {
   const { studentProfile: aluno, user } = useAuth()
@@ -34,6 +33,7 @@ export default function Dashboard() {
   if (!aluno) return <LoadingScreen />
 
   const overall = getOverallProgress(aluno, certificados)
+  const activeCategories = getActiveCategories(aluno)
   const hasCertificates = certificados.length > 0
 
   return (
@@ -58,7 +58,12 @@ export default function Dashboard() {
       ) : (
         <>
           <div className="mt-6">
-            <OverallProgressHero completed={overall.completed} goal={overall.goal} percent={overall.percent} />
+            <OverallProgressHero
+              validatedHours={overall.validatedHours}
+              pendingHours={overall.pendingHours}
+              requiredHours={overall.requiredHours}
+              percent={overall.percent}
+            />
           </div>
 
           <section aria-labelledby="categorias-heading" className="mt-8">
@@ -68,7 +73,7 @@ export default function Dashboard() {
 
             {hasCertificates ? (
               <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {CATEGORIES.map((category) => (
+                {activeCategories.map((category) => (
                   <CategoryCard
                     key={category.key}
                     category={category}

@@ -38,7 +38,7 @@ function addOverallSummary(doc, overall, startY) {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
   doc.setTextColor(...SUBTLE)
-  doc.text(`${overall.completed} de ${overall.goal} horas concluídas (${overall.percent}%)`, MARGIN, y)
+  doc.text(`${overall.validatedHours} de ${overall.requiredHours} horas concluídas (${overall.percent}%)`, MARGIN, y)
   y += 4
 
   doc.setFillColor(...LINE)
@@ -67,7 +67,7 @@ function addCategoryBreakdown(doc, categoryBreakdown, startY) {
     doc.text(label, MARGIN, y)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...SUBTLE)
-    doc.text(`${progress.completed}h de ${progress.goal}h (${progress.percent}%)`, MARGIN + 75, y)
+    doc.text(`${progress.validatedHours}h de ${progress.requiredHours}h (${progress.percent}%)`, MARGIN + 75, y)
     y += 6
   }
 

@@ -34,9 +34,12 @@ export default function Report() {
   const validated = useMemo(() => getValidatedCertificates(certificados), [certificados])
   const hasValidated = validated.length > 0
 
+  // Computed from `validated` (not the full `certificados` list): the report
+  // only ever concerns already-validated hours, so pending/rejected
+  // certificates play no part in either the on-screen breakdown or the PDF.
   const categoryBreakdown = useMemo(
-    () => CATEGORIES.map((category) => ({ label: category.label, progress: getCategoryProgress(category.key, aluno, certificados) })),
-    [aluno, certificados],
+    () => CATEGORIES.map((category) => ({ label: category.label, progress: getCategoryProgress(category.key, aluno, validated) })),
+    [aluno, validated],
   )
 
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
@@ -47,7 +50,7 @@ export default function Report() {
   // RequireStudent already guarantees a profile is loaded before this route renders; this is a defensive fallback.
   if (!aluno) return <LoadingScreen />
 
-  const overall = getOverallProgress(aluno, certificados)
+  const overall = getOverallProgress(aluno, validated)
 
   async function handleGeneratePdf() {
     setIsGeneratingPdf(true)

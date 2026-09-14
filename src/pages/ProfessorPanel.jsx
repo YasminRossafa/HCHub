@@ -118,7 +118,12 @@ export default function ProfessorPanel() {
         </header>
 
         <div className="mt-6">
-          <OverallProgressHero completed={overall.completed} goal={overall.goal} percent={overall.percent} />
+          <OverallProgressHero
+            validatedHours={overall.validatedHours}
+            pendingHours={overall.pendingHours}
+            requiredHours={overall.requiredHours}
+            percent={overall.percent}
+          />
         </div>
 
         <section aria-labelledby="categorias-heading" className="mt-8">

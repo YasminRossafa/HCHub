@@ -6,9 +6,9 @@ import ChipRadio from '../components/ChipRadio'
 import ConfirmDialog from '../components/ConfirmDialog'
 import EmptyState from '../components/EmptyState'
 import LoadingState from '../components/LoadingState'
-import { CATEGORIES } from '../constants/categories'
 import { useAuth } from '../contexts/AuthContext'
 import { deleteCertificate, getCertificates } from '../firebase/certificateService'
+import { getActiveCategories } from '../utils/progress'
 
 const STATUS_OPTIONS = [
   { value: 'todos', label: 'Todos' },
@@ -19,7 +19,7 @@ const STATUS_OPTIONS = [
 
 export default function History() {
   const location = useLocation()
-  const { user } = useAuth()
+  const { user, studentProfile: aluno } = useAuth()
   const [certificados, setCertificados] = useState([])
   const [certificatesLoading, setCertificatesLoading] = useState(true)
   const [flash, setFlash] = useState(location.state?.flash ?? null)
@@ -151,7 +151,7 @@ export default function History() {
                 checked={categoriaFiltro === 'todas'}
                 onChange={setCategoriaFiltro}
               />
-              {CATEGORIES.map((category) => (
+              {getActiveCategories(aluno).map((category) => (
                 <ChipRadio
                   key={category.key}
                   name="categoria-filtro"
