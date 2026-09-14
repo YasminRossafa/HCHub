@@ -72,8 +72,8 @@ function parsePayloadFromHash(hash) {
  * A read-only view of a student's progress, rendered entirely from the URL
  * (the `d=` payload lives in the hash fragment, never sent to any server —
  * see utils/shareLink.js). Deliberately outside AppLayout/RequireStudent:
- * whoever opens this link has no localStorage entry of their own, and
- * shouldn't see the app's edit-oriented nav.
+ * whoever opens this link has no account of their own here, and shouldn't
+ * see the app's edit-oriented nav.
  */
 export default function ProfessorPanel() {
   const location = useLocation()
@@ -152,9 +152,9 @@ export default function ProfessorPanel() {
                     className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:flex-row sm:items-center"
                   >
                     <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center">
-                      {cert.anexo && (
+                      {cert.anexoUrl && (
                         <img
-                          src={cert.anexo}
+                          src={cert.anexoUrl}
                           alt={`Certificado: ${cert.titulo}`}
                           className="h-32 w-full shrink-0 rounded-xl object-cover sm:h-16 sm:w-16"
                         />

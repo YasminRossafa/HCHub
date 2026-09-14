@@ -1,30 +1,84 @@
 import { ArrowLeft, X } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/Button'
+import LoadingState from '../components/LoadingState'
 import { CATEGORIES } from '../constants/categories'
-import { addCertificate, getCertificates, updateCertificate } from '../services/storageService'
+import { useAuth } from '../contexts/AuthContext'
+import { addCertificate, getCertificate, updateCertificate } from '../firebase/certificateService'
 import { todayISO } from '../utils/date'
 import { compressImage, isImageFile, MAX_ANEXO_ORIGINAL_BYTES } from '../utils/file'
 
 export default function CertificateForm() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const isEditing = Boolean(id)
-  const [existing] = useState(() => (id ? (getCertificates().find((c) => c.id === id) ?? null) : null))
 
-  const [titulo, setTitulo] = useState(existing?.titulo ?? '')
-  const [categoria, setCategoria] = useState(existing?.categoria ?? '')
-  const [cargaHoraria, setCargaHoraria] = useState(existing ? String(existing.cargaHoraria) : '')
-  const [data, setData] = useState(existing?.data ?? '')
-  const [observacoes, setObservacoes] = useState(existing?.observacoes ?? '')
-  const [anexo, setAnexo] = useState(existing?.anexo ?? null)
+  const [loadState, setLoadState] = useState(isEditing ? 'loading' : 'ready')
+
+  const [titulo, setTitulo] = useState('')
+  const [categoria, setCategoria] = useState('')
+  const [cargaHoraria, setCargaHoraria] = useState('')
+  const [data, setData] = useState('')
+  const [observacoes, setObservacoes] = useState('')
+
+  // `imageFile` is the newly compressed Blob staged for upload (null until the
+  // student picks a file, or after they remove one). `previewUrl` is what the
+  // <img> shows: an existing certificate's anexoUrl, or an object URL for a
+  // freshly picked file. Both are cleared together by "Remover".
+  const [imageFile, setImageFile] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const objectUrlRef = useRef(null)
+
   const [isProcessingFile, setIsProcessingFile] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
   const [errors, setErrors] = useState({})
   const fileInputRef = useRef(null)
 
-  if (isEditing && !existing) {
+  useEffect(() => {
+    if (!isEditing || !user) return
+    let active = true
+    getCertificate(user.uid, id)
+      .then((existing) => {
+        if (!active) return
+        if (!existing) {
+          setLoadState('not-found')
+          return
+        }
+        setTitulo(existing.titulo ?? '')
+        setCategoria(existing.categoria ?? '')
+        setCargaHoraria(String(existing.cargaHoraria ?? ''))
+        setData(existing.data ?? '')
+        setObservacoes(existing.observacoes ?? '')
+        setPreviewUrl(existing.anexoUrl ?? null)
+        setLoadState('ready')
+      })
+      .catch(() => {
+        if (active) setLoadState('not-found')
+      })
+    return () => {
+      active = false
+    }
+  }, [isEditing, id, user])
+
+  // Revoke any object URL we created for a freshly picked file when it's replaced or the form unmounts.
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current)
+    }
+  }, [])
+
+  if (loadState === 'not-found') {
     return <Navigate to="/historico" replace />
+  }
+
+  function setPreviewFromFile(blob) {
+    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current)
+    const url = URL.createObjectURL(blob)
+    objectUrlRef.current = url
+    setPreviewUrl(url)
   }
 
   function handleFileChange(event) {
@@ -48,13 +102,21 @@ export default function CertificateForm() {
     })
     setIsProcessingFile(true)
     compressImage(file)
-      .then((dataUrl) => setAnexo(dataUrl))
+      .then((blob) => {
+        setImageFile(blob)
+        setPreviewFromFile(blob)
+      })
       .catch(() => setErrors((prev) => ({ ...prev, anexo: 'Falha ao processar a imagem. Tente novamente.' })))
       .finally(() => setIsProcessingFile(false))
   }
 
   function handleRemoveAnexo() {
-    setAnexo(null)
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current)
+      objectUrlRef.current = null
+    }
+    setImageFile(null)
+    setPreviewUrl(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -74,14 +136,14 @@ export default function CertificateForm() {
       nextErrors.data = 'A data não pode ser no futuro.'
     }
 
-    if (!anexo) {
+    if (!previewUrl) {
       nextErrors.anexo = 'Anexe uma foto do certificado para confirmar as horas.'
     }
 
     return nextErrors
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const nextErrors = validate()
     setErrors(nextErrors)
@@ -93,16 +155,23 @@ export default function CertificateForm() {
       cargaHoraria: Number(cargaHoraria),
       data,
       observacoes: observacoes.trim(),
-      anexo,
       status: 'pendente',
     }
 
-    if (isEditing) {
-      updateCertificate(existing.id, payload)
-      navigate('/historico', { state: { flash: 'Certificado atualizado e reenviado para revisão.' } })
-    } else {
-      addCertificate(payload)
-      navigate('/historico', { state: { flash: 'Certificado registrado com sucesso!' } })
+    setSubmitError(null)
+    setIsSubmitting(true)
+    try {
+      if (isEditing) {
+        await updateCertificate(user.uid, id, payload, imageFile)
+        navigate('/historico', { state: { flash: 'Certificado atualizado e reenviado para revisão.' } })
+      } else {
+        await addCertificate(user.uid, payload, imageFile)
+        navigate('/historico', { state: { flash: 'Certificado registrado com sucesso!' } })
+      }
+    } catch (err) {
+      console.error(err)
+      setSubmitError('Não foi possível salvar o certificado. Verifique sua conexão e tente novamente.')
+      setIsSubmitting(false)
     }
   }
 
@@ -118,175 +187,194 @@ export default function CertificateForm() {
       </p>
 
       <div className="mt-6 rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-8">
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="titulo" className="text-sm font-medium text-slate-700">
-              Título
-            </label>
-            <input
-              id="titulo"
-              name="titulo"
-              type="text"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              aria-describedby={errors.titulo ? 'titulo-erro' : undefined}
-              aria-invalid={Boolean(errors.titulo)}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
-            />
-            {errors.titulo && (
-              <p id="titulo-erro" className="text-sm text-rose-600">
-                {errors.titulo}
-              </p>
-            )}
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2">
+        {loadState === 'loading' ? (
+          <LoadingState label="Carregando certificado…" />
+        ) : (
+          <form onSubmit={handleSubmit} noValidate aria-busy={isSubmitting} className="flex flex-col gap-6">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="categoria" className="text-sm font-medium text-slate-700">
-                Categoria
+              <label htmlFor="titulo" className="text-sm font-medium text-slate-700">
+                Título
               </label>
-              <select
-                id="categoria"
-                name="categoria"
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
-                aria-describedby={errors.categoria ? 'categoria-erro' : undefined}
-                aria-invalid={Boolean(errors.categoria)}
-                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
-              >
-                <option value="" disabled>
-                  Selecione uma categoria
-                </option>
-                {CATEGORIES.map((category) => (
-                  <option key={category.key} value={category.key}>
-                    {category.label}
+              <input
+                id="titulo"
+                name="titulo"
+                type="text"
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+                aria-describedby={errors.titulo ? 'titulo-erro' : undefined}
+                aria-invalid={Boolean(errors.titulo)}
+                className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+              />
+              {errors.titulo && (
+                <p id="titulo-erro" className="text-sm text-rose-600">
+                  {errors.titulo}
+                </p>
+              )}
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="categoria" className="text-sm font-medium text-slate-700">
+                  Categoria
+                </label>
+                <select
+                  id="categoria"
+                  name="categoria"
+                  value={categoria}
+                  onChange={(e) => setCategoria(e.target.value)}
+                  aria-describedby={errors.categoria ? 'categoria-erro' : undefined}
+                  aria-invalid={Boolean(errors.categoria)}
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                >
+                  <option value="" disabled>
+                    Selecione uma categoria
                   </option>
-                ))}
-              </select>
-              {errors.categoria && (
-                <p id="categoria-erro" className="text-sm text-rose-600">
-                  {errors.categoria}
+                  {CATEGORIES.map((category) => (
+                    <option key={category.key} value={category.key}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.categoria && (
+                  <p id="categoria-erro" className="text-sm text-rose-600">
+                    {errors.categoria}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="cargaHoraria" className="text-sm font-medium text-slate-700">
+                  Carga horária
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="cargaHoraria"
+                    name="cargaHoraria"
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    value={cargaHoraria}
+                    onChange={(e) => setCargaHoraria(e.target.value)}
+                    aria-describedby={errors.cargaHoraria ? 'cargaHoraria-erro' : undefined}
+                    aria-invalid={Boolean(errors.cargaHoraria)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                  />
+                  <span className="text-sm text-slate-500">horas</span>
+                </div>
+                {errors.cargaHoraria && (
+                  <p id="cargaHoraria-erro" className="text-sm text-rose-600">
+                    {errors.cargaHoraria}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5 sm:w-1/2 sm:pr-3">
+              <label htmlFor="data" className="text-sm font-medium text-slate-700">
+                Data
+              </label>
+              <input
+                id="data"
+                name="data"
+                type="date"
+                max={todayISO()}
+                value={data}
+                onChange={(e) => setData(e.target.value)}
+                aria-describedby={errors.data ? 'data-erro' : undefined}
+                aria-invalid={Boolean(errors.data)}
+                className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+              />
+              {errors.data && (
+                <p id="data-erro" className="text-sm text-rose-600">
+                  {errors.data}
                 </p>
               )}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="cargaHoraria" className="text-sm font-medium text-slate-700">
-                Carga horária
+              <label htmlFor="observacoes" className="text-sm font-medium text-slate-700">
+                Observações <span className="font-normal text-slate-400">(opcional)</span>
               </label>
-              <div className="flex items-center gap-2">
-                <input
-                  id="cargaHoraria"
-                  name="cargaHoraria"
-                  type="number"
-                  min="1"
-                  inputMode="numeric"
-                  value={cargaHoraria}
-                  onChange={(e) => setCargaHoraria(e.target.value)}
-                  aria-describedby={errors.cargaHoraria ? 'cargaHoraria-erro' : undefined}
-                  aria-invalid={Boolean(errors.cargaHoraria)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
-                />
-                <span className="text-sm text-slate-500">horas</span>
-              </div>
-              {errors.cargaHoraria && (
-                <p id="cargaHoraria-erro" className="text-sm text-rose-600">
-                  {errors.cargaHoraria}
+              <textarea
+                id="observacoes"
+                name="observacoes"
+                rows={3}
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+                className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="anexo" className="text-sm font-medium text-slate-700">
+                Foto do certificado
+              </label>
+              <input
+                id="anexo"
+                name="anexo"
+                type="file"
+                accept="image/jpeg,image/png"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                aria-describedby={errors.anexo ? 'anexo-erro' : 'anexo-dica'}
+                aria-invalid={Boolean(errors.anexo)}
+                className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 focus-visible:border-emerald-500"
+              />
+              <p id="anexo-dica" className="text-sm text-slate-500">
+                Obrigatória para confirmar as horas. JPEG ou PNG, até 5MB — a imagem é comprimida
+                automaticamente ao ser enviada.
+              </p>
+              {errors.anexo && (
+                <p id="anexo-erro" className="text-sm text-rose-600">
+                  {errors.anexo}
                 </p>
               )}
-            </div>
-          </div>
+              {isProcessingFile && (
+                <p role="status" aria-live="polite" className="text-sm text-slate-500">
+                  Comprimindo imagem…
+                </p>
+              )}
 
-          <div className="flex flex-col gap-1.5 sm:w-1/2 sm:pr-3">
-            <label htmlFor="data" className="text-sm font-medium text-slate-700">
-              Data
-            </label>
-            <input
-              id="data"
-              name="data"
-              type="date"
-              max={todayISO()}
-              value={data}
-              onChange={(e) => setData(e.target.value)}
-              aria-describedby={errors.data ? 'data-erro' : undefined}
-              aria-invalid={Boolean(errors.data)}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
-            />
-            {errors.data && (
-              <p id="data-erro" className="text-sm text-rose-600">
-                {errors.data}
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="observacoes" className="text-sm font-medium text-slate-700">
-              Observações <span className="font-normal text-slate-400">(opcional)</span>
-            </label>
-            <textarea
-              id="observacoes"
-              name="observacoes"
-              rows={3}
-              value={observacoes}
-              onChange={(e) => setObservacoes(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="anexo" className="text-sm font-medium text-slate-700">
-              Foto do certificado
-            </label>
-            <input
-              id="anexo"
-              name="anexo"
-              type="file"
-              accept="image/jpeg,image/png"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              aria-describedby={errors.anexo ? 'anexo-erro' : 'anexo-dica'}
-              aria-invalid={Boolean(errors.anexo)}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 focus-visible:border-emerald-500"
-            />
-            <p id="anexo-dica" className="text-sm text-slate-500">
-              Obrigatória para confirmar as horas. JPEG ou PNG, até 5MB — a imagem é comprimida
-              automaticamente ao ser enviada.
-            </p>
-            {errors.anexo && (
-              <p id="anexo-erro" className="text-sm text-rose-600">
-                {errors.anexo}
-              </p>
-            )}
-            {isProcessingFile && <p className="text-sm text-slate-500">Comprimindo imagem…</p>}
-
-            {anexo && !isProcessingFile && (
-              <div className="mt-1 flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <img
-                    src={anexo}
-                    alt="Pré-visualização da foto do certificado"
-                    className="h-12 w-12 shrink-0 rounded-lg object-cover"
-                  />
-                  <span className="truncate text-sm text-slate-600">Foto anexada</span>
+              {previewUrl && !isProcessingFile && (
+                <div className="mt-1 flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <img
+                      src={previewUrl}
+                      alt="Pré-visualização da foto do certificado"
+                      className="h-12 w-12 shrink-0 rounded-lg object-cover"
+                    />
+                    <span className="truncate text-sm text-slate-600">Foto anexada</span>
+                  </div>
+                  <Button type="button" variant="secondary" size="sm" onClick={handleRemoveAnexo}>
+                    <X aria-hidden="true" size={16} />
+                    Remover
+                  </Button>
                 </div>
-                <Button type="button" variant="secondary" size="sm" onClick={handleRemoveAnexo}>
-                  <X aria-hidden="true" size={16} />
-                  Remover
-                </Button>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
-              <ArrowLeft aria-hidden="true" size={18} />
-              Cancelar
-            </Button>
-            <Button type="submit" variant="primary" disabled={isProcessingFile}>
-              {isEditing ? 'Salvar alterações' : 'Registrar atividade'}
-            </Button>
-          </div>
-        </form>
+            {submitError && (
+              <p role="alert" className="text-sm text-rose-600">
+                {submitError}
+              </p>
+            )}
+            {isSubmitting && (
+              <p role="status" aria-live="polite" className="text-sm text-slate-500">
+                Enviando certificado…
+              </p>
+            )}
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Button type="button" variant="secondary" onClick={() => navigate(-1)} disabled={isSubmitting}>
+                <ArrowLeft aria-hidden="true" size={18} />
+                Cancelar
+              </Button>
+              <Button type="submit" variant="primary" disabled={isProcessingFile || isSubmitting}>
+                {isSubmitting ? 'Enviando…' : isEditing ? 'Salvar alterações' : 'Registrar atividade'}
+              </Button>
+            </div>
+          </form>
+        )}
       </div>
     </main>
   )

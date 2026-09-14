@@ -48,7 +48,7 @@ function slimCertificate(cert) {
     cargaHoraria: cert.cargaHoraria,
     data: cert.data,
     status: cert.status,
-    anexo: cert.anexo,
+    anexoUrl: cert.anexoUrl,
   }
 }
 

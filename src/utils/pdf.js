@@ -83,6 +83,23 @@ function loadImageDimensions(dataUrl) {
   })
 }
 
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(new Error('Não foi possível ler a imagem.'))
+    reader.readAsDataURL(blob)
+  })
+}
+
+/** Fetches a certificate's Storage image and converts it to a data URL jsPDF's addImage can embed. */
+async function fetchAsDataUrl(url) {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`Falha ao baixar imagem: ${response.status}`)
+  const blob = await response.blob()
+  return blobToDataUrl(blob)
+}
+
 async function addCertificates(doc, certificates, startY) {
   let y = startY
   doc.setFont('helvetica', 'bold')
@@ -106,13 +123,14 @@ async function addCertificates(doc, certificates, startY) {
       y = MARGIN
     }
 
-    if (cert.anexo) {
+    if (cert.anexoUrl) {
       try {
-        const dims = await loadImageDimensions(cert.anexo)
+        const dataUrl = await fetchAsDataUrl(cert.anexoUrl)
+        const dims = await loadImageDimensions(dataUrl)
         const scale = Math.min(IMAGE_BOX / dims.width, IMAGE_BOX / dims.height, 1)
         const w = dims.width * scale
         const h = dims.height * scale
-        doc.addImage(cert.anexo, 'JPEG', MARGIN, y, w, h)
+        doc.addImage(dataUrl, 'JPEG', MARGIN, y, w, h)
       } catch {
         // A single broken image shouldn't abort the whole report.
       }
@@ -140,8 +158,8 @@ async function addCertificates(doc, certificates, startY) {
 /**
  * Builds and downloads the PDF report. jsPDF is loaded on demand (not in the
  * main bundle) since most sessions never click "Gerar PDF". Certificate
- * images are drawn directly with `addImage` from the JPEG data URLs already
- * produced by the upload-time compression step (utils/file.js) — no
+ * images live in Firebase Storage now, so each one is fetched and converted
+ * to a data URL (`fetchAsDataUrl`) before `addImage` can embed it — no
  * html2canvas round-trip needed since there's no arbitrary styled HTML to
  * rasterize, just structured text + images we lay out ourselves.
  */

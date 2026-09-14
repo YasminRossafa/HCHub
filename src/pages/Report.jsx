@@ -1,21 +1,36 @@
 import { AlertTriangle, FileDown, FileText, Link2, Mail } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Button from '../components/Button'
 import CategoryCard from '../components/CategoryCard'
 import EmptyState from '../components/EmptyState'
 import LoadingScreen from '../components/LoadingScreen'
+import LoadingState from '../components/LoadingState'
 import { CATEGORIES, CATEGORIES_BY_KEY } from '../constants/categories'
 import { useAuth } from '../contexts/AuthContext'
-import { getCertificates } from '../services/storageService'
+import { getCertificates } from '../firebase/certificateService'
 import { formatDate } from '../utils/date'
 import { generateReportPdf } from '../utils/pdf'
 import { getCategoryProgress, getOverallProgress, getValidatedCertificates } from '../utils/progress'
 import { buildShareableLink } from '../utils/shareLink'
 
 export default function Report() {
-  const { studentProfile: aluno } = useAuth()
-  // Certificates still live in localStorage; the student profile now comes from Firestore (see AuthContext).
-  const [certificados] = useState(getCertificates)
+  const { studentProfile: aluno, user } = useAuth()
+  const [certificados, setCertificados] = useState([])
+  const [certificatesLoading, setCertificatesLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user) return undefined
+    let active = true
+    setCertificatesLoading(true)
+    getCertificates(user.uid)
+      .then((data) => active && setCertificados(data))
+      .catch((err) => console.error(err))
+      .finally(() => active && setCertificatesLoading(false))
+    return () => {
+      active = false
+    }
+  }, [user])
+
   const validated = useMemo(() => getValidatedCertificates(certificados), [certificados])
   const hasValidated = validated.length > 0
 
@@ -88,7 +103,11 @@ export default function Report() {
           no relatório — são os únicos já confirmados pelo professor.
         </p>
 
-        {!hasValidated ? (
+        {certificatesLoading ? (
+          <div className="mt-4">
+            <LoadingState label="Carregando certificados…" />
+          </div>
+        ) : !hasValidated ? (
           <div className="mt-4">
             <EmptyState
               icon={FileText}
@@ -120,7 +139,7 @@ export default function Report() {
                     className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100"
                   >
                     <img
-                      src={cert.anexo}
+                      src={cert.anexoUrl}
                       alt={`Certificado: ${cert.titulo}`}
                       className="h-14 w-14 shrink-0 rounded-lg object-cover"
                     />
