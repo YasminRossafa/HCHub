@@ -5,8 +5,10 @@ import CertificateListItem from '../components/CertificateListItem'
 import ChipRadio from '../components/ChipRadio'
 import ConfirmDialog from '../components/ConfirmDialog'
 import EmptyState from '../components/EmptyState'
+import LoadingState from '../components/LoadingState'
 import { CATEGORIES } from '../constants/categories'
-import { deleteCertificate, getCertificates } from '../services/storageService'
+import { useAuth } from '../contexts/AuthContext'
+import { deleteCertificate, getCertificates } from '../firebase/certificateService'
 
 const STATUS_OPTIONS = [
   { value: 'todos', label: 'Todos' },
@@ -17,18 +19,35 @@ const STATUS_OPTIONS = [
 
 export default function History() {
   const location = useLocation()
-  const [certificados, setCertificados] = useState(getCertificates)
+  const { user } = useAuth()
+  const [certificados, setCertificados] = useState([])
+  const [certificatesLoading, setCertificatesLoading] = useState(true)
   const [flash, setFlash] = useState(location.state?.flash ?? null)
   const [search, setSearch] = useState('')
   const [categoriaFiltro, setCategoriaFiltro] = useState('todas')
   const [statusFiltro, setStatusFiltro] = useState('todos')
   const [pendingDelete, setPendingDelete] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState(null)
 
   useEffect(() => {
     if (!flash) return undefined
     const timer = setTimeout(() => setFlash(null), 4000)
     return () => clearTimeout(timer)
   }, [flash])
+
+  useEffect(() => {
+    if (!user) return undefined
+    let active = true
+    setCertificatesLoading(true)
+    getCertificates(user.uid)
+      .then((data) => active && setCertificados(data))
+      .catch((err) => console.error(err))
+      .finally(() => active && setCertificatesLoading(false))
+    return () => {
+      active = false
+    }
+  }, [user])
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -46,11 +65,20 @@ export default function History() {
     setStatusFiltro('todos')
   }
 
-  function handleConfirmDelete() {
+  async function handleConfirmDelete() {
     if (!pendingDelete) return
-    deleteCertificate(pendingDelete.id)
-    setCertificados(getCertificates())
-    setPendingDelete(null)
+    setDeleteError(null)
+    setIsDeleting(true)
+    try {
+      await deleteCertificate(user.uid, pendingDelete.id)
+      setCertificados((prev) => prev.filter((c) => c.id !== pendingDelete.id))
+      setPendingDelete(null)
+    } catch (err) {
+      console.error(err)
+      setDeleteError('Não foi possível excluir o certificado. Tente novamente.')
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const hasAnyCertificates = certificados.length > 0
@@ -84,7 +112,13 @@ export default function History() {
         <p className="text-sm text-slate-500">Acompanhe todos os certificados registrados.</p>
       </header>
 
-      {hasAnyCertificates && (
+      {certificatesLoading && (
+        <div className="mt-6">
+          <LoadingState label="Carregando certificados…" />
+        </div>
+      )}
+
+      {!certificatesLoading && hasAnyCertificates && (
         <div className="mt-6 flex flex-col gap-5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:p-5">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="busca" className="text-sm font-medium text-slate-700">
@@ -149,35 +183,37 @@ export default function History() {
         </div>
       )}
 
-      <div className="mt-6">
-        {!hasAnyCertificates ? (
-          <EmptyState />
-        ) : filtered.length === 0 ? (
-          <EmptyState
-            icon={SearchX}
-            title="Nenhum resultado encontrado"
-            description="Tente ajustar sua busca ou os filtros selecionados."
-            actionLabel="Limpar filtros"
-            onAction={clearFilters}
-          />
-        ) : (
-          <>
-            <p className="mb-3 text-sm text-slate-500">
-              {filtered.length} de {certificados.length} certificado{certificados.length === 1 ? '' : 's'}
-              {hasFiltersApplied ? ' (filtrado)' : ''}
-            </p>
-            <ul className="flex flex-col gap-3">
-              {filtered.map((cert) => (
-                <CertificateListItem
-                  key={cert.id}
-                  certificate={cert}
-                  onDeleteRequest={() => setPendingDelete(cert)}
-                />
-              ))}
-            </ul>
-          </>
-        )}
-      </div>
+      {!certificatesLoading && (
+        <div className="mt-6">
+          {!hasAnyCertificates ? (
+            <EmptyState />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={SearchX}
+              title="Nenhum resultado encontrado"
+              description="Tente ajustar sua busca ou os filtros selecionados."
+              actionLabel="Limpar filtros"
+              onAction={clearFilters}
+            />
+          ) : (
+            <>
+              <p className="mb-3 text-sm text-slate-500">
+                {filtered.length} de {certificados.length} certificado{certificados.length === 1 ? '' : 's'}
+                {hasFiltersApplied ? ' (filtrado)' : ''}
+              </p>
+              <ul className="flex flex-col gap-3">
+                {filtered.map((cert) => (
+                  <CertificateListItem
+                    key={cert.id}
+                    certificate={cert}
+                    onDeleteRequest={() => setPendingDelete(cert)}
+                  />
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
 
       <ConfirmDialog
         open={Boolean(pendingDelete)}
@@ -187,10 +223,20 @@ export default function History() {
             ? `Tem certeza de que deseja excluir "${pendingDelete.titulo}"? Essa ação não pode ser desfeita.`
             : ''
         }
-        confirmLabel="Excluir"
+        confirmLabel={isDeleting ? 'Excluindo…' : 'Excluir'}
+        isConfirming={isDeleting}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setPendingDelete(null)}
-      />
+        onCancel={() => {
+          setDeleteError(null)
+          setPendingDelete(null)
+        }}
+      >
+        {deleteError && (
+          <p role="alert" className="text-sm text-rose-600">
+            {deleteError}
+          </p>
+        )}
+      </ConfirmDialog>
     </main>
   )
 }

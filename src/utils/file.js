@@ -19,12 +19,18 @@ function loadImageElement(file) {
   })
 }
 
+function canvasToBlob(canvas, quality) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Não foi possível gerar a imagem.'))), 'image/jpeg', quality)
+  })
+}
+
 /**
  * Resizes an image file to fit within `maxDimension` on its longest side and
  * re-encodes it as JPEG, stepping quality down until it's under
- * `targetBytes` (or a quality floor is hit). Returns a JPEG data URL — this
- * is what keeps a "5MB photo" from a phone camera down to a size that's
- * still reasonable to store in localStorage and, later, in a shareable link.
+ * `targetBytes` (or a quality floor is hit). Returns a JPEG Blob, ready to
+ * upload to Firebase Storage — smaller files still mean faster uploads and
+ * faster loads later, even without localStorage's size constraints.
  */
 export async function compressImage(file, { maxDimension = ANEXO_MAX_DIMENSION, targetBytes = ANEXO_TARGET_BYTES } = {}) {
   const { img, objectUrl } = await loadImageElement(file)
@@ -40,13 +46,12 @@ export async function compressImage(file, { maxDimension = ANEXO_MAX_DIMENSION, 
     ctx.drawImage(img, 0, 0, width, height)
 
     let quality = 0.85
-    let dataUrl = canvas.toDataURL('image/jpeg', quality)
-    // Base64 inflates bytes by ~4/3; approximate the decoded size from string length.
-    while (dataUrl.length * 0.75 > targetBytes && quality > 0.3) {
+    let blob = await canvasToBlob(canvas, quality)
+    while (blob.size > targetBytes && quality > 0.3) {
       quality -= 0.15
-      dataUrl = canvas.toDataURL('image/jpeg', quality)
+      blob = await canvasToBlob(canvas, quality)
     }
-    return dataUrl
+    return blob
   } finally {
     URL.revokeObjectURL(objectUrl)
   }
