@@ -26,6 +26,11 @@ export function getCategoryProgress(categoryKey, aluno, certificados) {
   return toProgress(completed, goal)
 }
 
+/** Certificates confirmed by a professor — the only ones that count toward progress or a report. */
+export function getValidatedCertificates(certificados) {
+  return certificados.filter((c) => c.status === 'validado')
+}
+
 /** Validated hours across every category, against the sum of all goals. */
 export function getOverallProgress(aluno, certificados) {
   const totals = CATEGORIES.reduce(

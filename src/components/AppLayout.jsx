@@ -1,10 +1,11 @@
-import { ClipboardList, LayoutDashboard, PlusCircle } from 'lucide-react'
+import { ClipboardList, FileText, LayoutDashboard, PlusCircle } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Painel', icon: LayoutDashboard },
   { to: '/registrar', label: 'Registrar', icon: PlusCircle },
   { to: '/historico', label: 'Histórico', icon: ClipboardList },
+  { to: '/relatorio', label: 'Relatório', icon: FileText },
 ]
 
 function topLinkClass({ isActive }) {
@@ -50,7 +51,7 @@ export default function AppLayout() {
         aria-label="Principal"
         className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] sm:hidden"
       >
-        <div className="grid grid-cols-3">
+        <div className="grid grid-cols-4">
           {NAV_ITEMS.map((item) => (
             <NavLink key={item.to} to={item.to} className={bottomLinkClass}>
               <item.icon aria-hidden="true" size={22} />

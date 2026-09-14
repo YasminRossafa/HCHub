@@ -1,11 +1,11 @@
-import { ArrowLeft, FileText, X } from 'lucide-react'
+import { ArrowLeft, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/Button'
 import { CATEGORIES } from '../constants/categories'
 import { addCertificate, getCertificates, updateCertificate } from '../services/storageService'
 import { todayISO } from '../utils/date'
-import { isAcceptedAnexoType, MAX_ANEXO_BYTES, readFileAsDataURL } from '../utils/file'
+import { compressImage, isImageFile, MAX_ANEXO_ORIGINAL_BYTES } from '../utils/file'
 
 export default function CertificateForm() {
   const { id } = useParams()
@@ -31,13 +31,13 @@ export default function CertificateForm() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    if (!isAcceptedAnexoType(file)) {
-      setErrors((prev) => ({ ...prev, anexo: 'Envie um arquivo de imagem ou PDF.' }))
+    if (!isImageFile(file)) {
+      setErrors((prev) => ({ ...prev, anexo: 'Envie uma imagem (JPEG ou PNG).' }))
       event.target.value = ''
       return
     }
-    if (file.size > MAX_ANEXO_BYTES) {
-      setErrors((prev) => ({ ...prev, anexo: 'O arquivo deve ter no máximo 400KB.' }))
+    if (file.size > MAX_ANEXO_ORIGINAL_BYTES) {
+      setErrors((prev) => ({ ...prev, anexo: 'A imagem deve ter no máximo 5MB.' }))
       event.target.value = ''
       return
     }
@@ -47,9 +47,9 @@ export default function CertificateForm() {
       return rest
     })
     setIsProcessingFile(true)
-    readFileAsDataURL(file)
+    compressImage(file)
       .then((dataUrl) => setAnexo(dataUrl))
-      .catch(() => setErrors((prev) => ({ ...prev, anexo: 'Falha ao ler o arquivo. Tente novamente.' })))
+      .catch(() => setErrors((prev) => ({ ...prev, anexo: 'Falha ao processar a imagem. Tente novamente.' })))
       .finally(() => setIsProcessingFile(false))
   }
 
@@ -72,6 +72,10 @@ export default function CertificateForm() {
       nextErrors.data = 'Informe a data da atividade.'
     } else if (data > todayISO()) {
       nextErrors.data = 'A data não pode ser no futuro.'
+    }
+
+    if (!anexo) {
+      nextErrors.anexo = 'Anexe uma foto do certificado para confirmar as horas.'
     }
 
     return nextErrors
@@ -231,13 +235,13 @@ export default function CertificateForm() {
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="anexo" className="text-sm font-medium text-slate-700">
-              Anexo <span className="font-normal text-slate-400">(opcional)</span>
+              Foto do certificado
             </label>
             <input
               id="anexo"
               name="anexo"
               type="file"
-              accept="image/*,application/pdf"
+              accept="image/jpeg,image/png"
               ref={fileInputRef}
               onChange={handleFileChange}
               aria-describedby={errors.anexo ? 'anexo-erro' : 'anexo-dica'}
@@ -245,30 +249,25 @@ export default function CertificateForm() {
               className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 focus-visible:border-emerald-500"
             />
             <p id="anexo-dica" className="text-sm text-slate-500">
-              Imagem ou PDF, até 400KB.
+              Obrigatória para confirmar as horas. JPEG ou PNG, até 5MB — a imagem é comprimida
+              automaticamente ao ser enviada.
             </p>
             {errors.anexo && (
               <p id="anexo-erro" className="text-sm text-rose-600">
                 {errors.anexo}
               </p>
             )}
-            {isProcessingFile && <p className="text-sm text-slate-500">Processando arquivo…</p>}
+            {isProcessingFile && <p className="text-sm text-slate-500">Comprimindo imagem…</p>}
 
             {anexo && !isProcessingFile && (
               <div className="mt-1 flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  {anexo.startsWith('data:image') ? (
-                    <img
-                      src={anexo}
-                      alt="Pré-visualização do anexo"
-                      className="h-12 w-12 shrink-0 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                      <FileText aria-hidden="true" className="text-slate-500" size={20} />
-                    </span>
-                  )}
-                  <span className="truncate text-sm text-slate-600">Arquivo anexado</span>
+                  <img
+                    src={anexo}
+                    alt="Pré-visualização da foto do certificado"
+                    className="h-12 w-12 shrink-0 rounded-lg object-cover"
+                  />
+                  <span className="truncate text-sm text-slate-600">Foto anexada</span>
                 </div>
                 <Button type="button" variant="secondary" size="sm" onClick={handleRemoveAnexo}>
                   <X aria-hidden="true" size={16} />

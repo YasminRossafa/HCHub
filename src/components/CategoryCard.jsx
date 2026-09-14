@@ -2,7 +2,8 @@ import { PROGRESS_STATUS_CONFIG } from '../constants/statusConfig'
 import ProgressBar from './ProgressBar'
 import StatusBadge from './StatusBadge'
 
-export default function CategoryCard({ category, progress }) {
+/** `count`, when passed, appends "· N certificado(s)" — used by Report/ProfessorPanel. */
+export default function CategoryCard({ category, progress, count }) {
   const Icon = category.icon
   const { completed, goal, percent, status } = progress
 
@@ -19,6 +20,11 @@ export default function CategoryCard({ category, progress }) {
 
       <p className="mt-4 text-sm text-slate-500">
         <span className="text-lg font-bold text-slate-900">{completed}</span> de {goal}h
+        {typeof count === 'number' && count > 0 && (
+          <span className="ml-1">
+            · {count} certificado{count === 1 ? '' : 's'}
+          </span>
+        )}
       </p>
 
       <div className="mt-2">
