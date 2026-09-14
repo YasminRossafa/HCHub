@@ -1,18 +1,19 @@
 import { ArrowLeft, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/Button'
 import LoadingState from '../components/LoadingState'
-import { CATEGORIES } from '../constants/categories'
+import { CATEGORIES_BY_KEY } from '../constants/categories'
 import { useAuth } from '../contexts/AuthContext'
 import { addCertificate, getCertificate, updateCertificate } from '../firebase/certificateService'
 import { todayISO } from '../utils/date'
 import { compressImage, isImageFile, MAX_ANEXO_ORIGINAL_BYTES } from '../utils/file'
+import { getActiveCategories } from '../utils/progress'
 
 export default function CertificateForm() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, studentProfile: aluno } = useAuth()
   const isEditing = Boolean(id)
 
   const [loadState, setLoadState] = useState(isEditing ? 'loading' : 'ready')
@@ -36,6 +37,19 @@ export default function CertificateForm() {
   const [submitError, setSubmitError] = useState(null)
   const [errors, setErrors] = useState({})
   const fileInputRef = useRef(null)
+
+  // A category with a zeroed-out goal is normally hidden from this dropdown,
+  // but if the certificate being edited was already tagged with one (goal
+  // zeroed after the fact, or before this account had any goals), it's kept
+  // as an option so editing doesn't blank out or silently change existing data.
+  const categoryOptions = useMemo(() => {
+    const active = getActiveCategories(aluno)
+    if (categoria && !active.some((c) => c.key === categoria)) {
+      const original = CATEGORIES_BY_KEY[categoria]
+      if (original) return [...active, original]
+    }
+    return active
+  }, [aluno, categoria])
 
   useEffect(() => {
     if (!isEditing || !user) return
@@ -229,7 +243,7 @@ export default function CertificateForm() {
                   <option value="" disabled>
                     Selecione uma categoria
                   </option>
-                  {CATEGORIES.map((category) => (
+                  {categoryOptions.map((category) => (
                     <option key={category.key} value={category.key}>
                       {category.label}
                     </option>

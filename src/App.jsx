@@ -9,6 +9,7 @@ import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
 import ProfessorPanel from './pages/ProfessorPanel'
 import Report from './pages/Report'
+import Settings from './pages/Settings'
 import Signup from './pages/Signup'
 
 /** Login/Signup: bounce a signed-in user back into the app rather than showing the auth form again. */
@@ -86,6 +87,7 @@ export default function App() {
         <Route path="/registrar/:id" element={<CertificateForm />} />
         <Route path="/historico" element={<History />} />
         <Route path="/relatorio" element={<Report />} />
+        <Route path="/configuracoes" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

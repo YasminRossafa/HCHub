@@ -1,4 +1,4 @@
-import { ClipboardList, FileText, LayoutDashboard, LogOut, PlusCircle } from 'lucide-react'
+import { ClipboardList, FileText, LayoutDashboard, LogOut, PlusCircle, Settings } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { signOut } from '../firebase/authService'
 
@@ -29,6 +29,12 @@ function bottomLinkClass({ isActive }) {
   }`
 }
 
+function iconLinkClass({ isActive }) {
+  return `flex items-center justify-center rounded-xl p-2.5 transition-colors ${
+    isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+  }`
+}
+
 /**
  * Persistent navigation shell for every screen past onboarding. A top bar
  * serves tablet/desktop (mouse-hover affordances are fine there); phones get
@@ -36,22 +42,30 @@ function bottomLinkClass({ isActive }) {
  * needs no hover state — the same pattern students already know from any
  * native app. Both navs share the "Principal" label but only one is ever
  * `display`-rendered at a time, so assistive tech never sees a duplicate.
- * A slim phone-only header carries the logout action, since the bottom tab
- * bar's four slots are reserved for primary navigation.
+ * A slim phone-only header carries the logout action and a settings
+ * shortcut, since the bottom tab bar's four slots are reserved for primary
+ * navigation — Settings is an account-level action, not primary content, so
+ * it lives next to "Sair" on both breakpoints instead of competing for one
+ * of those four slots.
  */
 export default function AppLayout() {
   return (
     <div className="min-h-screen pb-20 sm:pb-0">
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:hidden">
         <span className="text-lg font-bold text-slate-900">HCHub</span>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-        >
-          <LogOut aria-hidden="true" size={18} />
-          Sair
-        </button>
+        <div className="flex items-center gap-1">
+          <NavLink to="/configuracoes" aria-label="Configurações" className={iconLinkClass}>
+            <Settings aria-hidden="true" size={20} />
+          </NavLink>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          >
+            <LogOut aria-hidden="true" size={18} />
+            Sair
+          </button>
+        </div>
       </header>
 
       <nav aria-label="Principal" className="sticky top-0 z-30 hidden border-b border-slate-200 bg-white sm:block">
@@ -64,6 +78,10 @@ export default function AppLayout() {
                 {item.label}
               </NavLink>
             ))}
+            <NavLink to="/configuracoes" className={topLinkClass}>
+              <Settings aria-hidden="true" size={18} />
+              Configurações
+            </NavLink>
             <button
               type="button"
               onClick={handleLogout}

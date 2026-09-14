@@ -1,3 +1,4 @@
+import { Clock } from 'lucide-react'
 import { PROGRESS_STATUS_CONFIG } from '../constants/statusConfig'
 import ProgressBar from './ProgressBar'
 import StatusBadge from './StatusBadge'
@@ -5,7 +6,8 @@ import StatusBadge from './StatusBadge'
 /** `count`, when passed, appends "· N certificado(s)" — used by Report/ProfessorPanel. */
 export default function CategoryCard({ category, progress, count }) {
   const Icon = category.icon
-  const { completed, goal, percent, status } = progress
+  const { validatedHours, pendingHours, requiredHours, percent, pendingPercent, status } = progress
+  const hasPending = pendingHours > 0
 
   return (
     <li className="rounded-2xl bg-white p-5 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100">
@@ -19,7 +21,14 @@ export default function CategoryCard({ category, progress, count }) {
       </div>
 
       <p className="mt-4 text-sm text-slate-500">
-        <span className="text-lg font-bold text-slate-900">{completed}</span> de {goal}h
+        <span className="text-lg font-bold text-slate-900">{validatedHours}h</span> validadas
+        {hasPending && (
+          <>
+            {' + '}
+            <span className="font-semibold text-amber-800">{pendingHours}h</span> pendentes
+          </>
+        )}{' '}
+        de {requiredHours}h necessárias
         {typeof count === 'number' && count > 0 && (
           <span className="ml-1">
             · {count} certificado{count === 1 ? '' : 's'}
@@ -30,13 +39,23 @@ export default function CategoryCard({ category, progress, count }) {
       <div className="mt-2">
         <ProgressBar
           percent={percent}
+          secondaryPercent={pendingPercent}
           fillClassName={category.solidBg}
-          label={`Progresso em ${category.label}: ${completed} de ${goal} horas`}
+          secondaryClassName="bg-amber-500"
+          label={`Progresso em ${category.label}: ${validatedHours}h validadas${
+            hasPending ? ` e ${pendingHours}h pendentes` : ''
+          } de ${requiredHours}h necessárias`}
         />
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <StatusBadge status={status} config={PROGRESS_STATUS_CONFIG} />
+        {hasPending && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-800">
+            <Clock aria-hidden="true" size={14} />
+            {pendingHours}h aguardando validação
+          </span>
+        )}
       </div>
     </li>
   )
