@@ -1,5 +1,6 @@
-import { ClipboardList, FileText, LayoutDashboard, PlusCircle } from 'lucide-react'
+import { ClipboardList, FileText, LayoutDashboard, LogOut, PlusCircle } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { signOut } from '../firebase/authService'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Painel', icon: LayoutDashboard },
@@ -7,6 +8,14 @@ const NAV_ITEMS = [
   { to: '/historico', label: 'Histórico', icon: ClipboardList },
   { to: '/relatorio', label: 'Relatório', icon: FileText },
 ]
+
+async function handleLogout() {
+  try {
+    await signOut()
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 function topLinkClass({ isActive }) {
   return `flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
@@ -27,10 +36,24 @@ function bottomLinkClass({ isActive }) {
  * needs no hover state — the same pattern students already know from any
  * native app. Both navs share the "Principal" label but only one is ever
  * `display`-rendered at a time, so assistive tech never sees a duplicate.
+ * A slim phone-only header carries the logout action, since the bottom tab
+ * bar's four slots are reserved for primary navigation.
  */
 export default function AppLayout() {
   return (
     <div className="min-h-screen pb-20 sm:pb-0">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:hidden">
+        <span className="text-lg font-bold text-slate-900">HCHub</span>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+        >
+          <LogOut aria-hidden="true" size={18} />
+          Sair
+        </button>
+      </header>
+
       <nav aria-label="Principal" className="sticky top-0 z-30 hidden border-b border-slate-200 bg-white sm:block">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
           <span className="text-lg font-bold text-slate-900">HCHub</span>
@@ -41,6 +64,14 @@ export default function AppLayout() {
                 {item.label}
               </NavLink>
             ))}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="ml-2 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            >
+              <LogOut aria-hidden="true" size={18} />
+              Sair
+            </button>
           </div>
         </div>
       </nav>

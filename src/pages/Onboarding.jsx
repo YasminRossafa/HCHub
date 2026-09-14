@@ -3,17 +3,21 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
 import { CATEGORIES, DEFAULT_METAS } from '../constants/categories'
-import { saveStudent } from '../services/storageService'
+import { useAuth } from '../contexts/AuthContext'
+import { saveStudentProfile } from '../firebase/studentService'
 
 const CURRENT_YEAR = new Date().getFullYear()
 
 export default function Onboarding() {
   const navigate = useNavigate()
+  const { user, refreshStudentProfile } = useAuth()
   const [nome, setNome] = useState('')
   const [curso, setCurso] = useState('')
   const [anoIngresso, setAnoIngresso] = useState(String(CURRENT_YEAR))
   const [metas, setMetas] = useState(DEFAULT_METAS)
   const [errors, setErrors] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
 
   function updateMeta(key, value) {
     setMetas((prev) => ({ ...prev, [key]: value }))
@@ -39,19 +43,29 @@ export default function Onboarding() {
     return nextErrors
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const nextErrors = validate()
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
-    saveStudent({
-      nome: nome.trim(),
-      curso: curso.trim(),
-      anoIngresso: Number(anoIngresso),
-      metas: Object.fromEntries(CATEGORIES.map((c) => [c.key, Number(metas[c.key])])),
-    })
-    navigate('/dashboard')
+    setSubmitError(null)
+    setIsSubmitting(true)
+    try {
+      await saveStudentProfile(user.uid, {
+        nome: nome.trim(),
+        curso: curso.trim(),
+        anoIngresso: Number(anoIngresso),
+        metas: Object.fromEntries(CATEGORIES.map((c) => [c.key, Number(metas[c.key])])),
+      })
+      await refreshStudentProfile(user.uid)
+      navigate('/dashboard')
+    } catch (err) {
+      console.error(err)
+      setSubmitError('Não foi possível salvar seu perfil. Verifique sua conexão e tente novamente.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -176,8 +190,19 @@ export default function Onboarding() {
             </div>
           </fieldset>
 
-          <Button type="submit" variant="primary" className="w-full sm:w-auto sm:self-start">
-            Começar a acompanhar
+          {submitError && (
+            <p role="alert" className="text-sm text-rose-600">
+              {submitError}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full sm:w-auto sm:self-start"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Salvando…' : 'Começar a acompanhar'}
           </Button>
         </form>
       </div>
