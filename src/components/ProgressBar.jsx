@@ -30,7 +30,7 @@ export default function ProgressBar({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label={label}
-      className={`flex w-full ${height} rounded-full bg-slate-200 overflow-hidden`}
+      className={`flex w-full ${height} rounded-full bg-slate-200 overflow-hidden dark:bg-slate-800`}
     >
       <div
         className={`${height} shrink-0 ${fillClassName} transition-[width] duration-500 ease-out`}

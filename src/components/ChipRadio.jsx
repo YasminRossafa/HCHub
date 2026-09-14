@@ -22,8 +22,8 @@ export default function ChipRadio({ name, value, label, icon: Icon, checked, onC
         htmlFor={id}
         className={`flex cursor-pointer items-center gap-1.5 rounded-full border-2 px-3.5 py-2 text-sm font-medium transition-colors ${
           checked
-            ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
-            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+            ? 'border-emerald-600 bg-emerald-50 text-emerald-800 dark:border-emerald-500 dark:bg-emerald-950 dark:text-emerald-300'
+            : 'border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600'
         }`}
       >
         {Icon && <Icon aria-hidden="true" size={14} />}

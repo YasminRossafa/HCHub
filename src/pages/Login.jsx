@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import AccountLinkDialog from '../components/AccountLinkDialog'
 import Button from '../components/Button'
 import GoogleIcon from '../components/GoogleIcon'
+import ThemeToggle from '../components/ThemeToggle'
 import { getAuthErrorMessage, requestPasswordReset, signInWithEmail, signInWithGoogle } from '../firebase/authService'
 import { useAccountLinking } from '../firebase/useAccountLinking'
 
@@ -118,22 +119,23 @@ export default function Login() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
-      <div className="rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-10">
+      <div className="flex justify-end">
+        <ThemeToggle />
+      </div>
+
+      <div className="mt-4 rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-10 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800">
         {view === 'login' ? (
           <>
             <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
-                <GraduationCap aria-hidden="true" className="text-emerald-600" size={26} />
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950">
+                <GraduationCap aria-hidden="true" className="text-emerald-600 dark:text-emerald-400" size={26} />
               </span>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">Entrar no HCHub</h1>
-                <p className="text-sm text-slate-500">Acesse sua conta para acompanhar suas horas complementares.</p>
-              </div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Entrar no HCHub</h1>
             </div>
 
-            <form className="mt-8 flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
+            <form className="mt-6 flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="email" className="text-sm font-medium text-slate-700">
+                <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   E-mail
                 </label>
                 <input
@@ -145,10 +147,10 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   aria-describedby={errors.email ? 'email-erro' : undefined}
                   aria-invalid={Boolean(errors.email)}
-                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
                 {errors.email && (
-                  <p id="email-erro" className="text-sm text-rose-600">
+                  <p id="email-erro" className="text-sm text-rose-600 dark:text-rose-400">
                     {errors.email}
                   </p>
                 )}
@@ -156,13 +158,13 @@ export default function Login() {
 
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-baseline justify-between gap-2">
-                  <label htmlFor="password" className="text-sm font-medium text-slate-700">
+                  <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     Senha
                   </label>
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                    className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
                   >
                     Esqueci minha senha
                   </button>
@@ -176,23 +178,23 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   aria-describedby={errors.password ? 'password-erro' : undefined}
                   aria-invalid={Boolean(errors.password)}
-                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
                 {errors.password && (
-                  <p id="password-erro" className="text-sm text-rose-600">
+                  <p id="password-erro" className="text-sm text-rose-600 dark:text-rose-400">
                     {errors.password}
                   </p>
                 )}
               </div>
 
               {formError && (
-                <p role="alert" className="text-sm text-rose-600">
+                <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">
                   {formError}
                 </p>
               )}
 
               {successMessage && (
-                <p role="status" className="text-sm font-medium text-emerald-700">
+                <p role="status" className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
                   {successMessage}
                 </p>
               )}
@@ -203,9 +205,9 @@ export default function Login() {
             </form>
 
             <div className="mt-6 flex items-center gap-3" role="separator">
-              <span className="h-px flex-1 bg-slate-200" />
-              <span className="text-sm text-slate-500">ou</span>
-              <span className="h-px flex-1 bg-slate-200" />
+              <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+              <span className="text-sm text-slate-500 dark:text-slate-400">ou</span>
+              <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
             </div>
 
             <Button
@@ -219,9 +221,12 @@ export default function Login() {
               {isGoogleSubmitting ? 'Conectando…' : 'Entrar com Google'}
             </Button>
 
-            <p className="mt-8 text-center text-sm text-slate-500">
+            <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
               Ainda não tem conta?{' '}
-              <Link to="/cadastro" className="font-semibold text-emerald-700 hover:text-emerald-800">
+              <Link
+                to="/cadastro"
+                className="font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+              >
                 Cadastre-se
               </Link>
             </p>
@@ -231,20 +236,20 @@ export default function Login() {
             <button
               type="button"
               onClick={handleBackToLogin}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
             >
               <ArrowLeft aria-hidden="true" size={16} />
               Voltar para login
             </button>
 
-            <h1 className="mt-4 text-2xl font-bold text-slate-900">Redefinir senha</h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <h1 className="mt-4 text-2xl font-bold text-slate-900 dark:text-slate-100">Redefinir senha</h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Informe seu e-mail cadastrado e enviaremos um link para você criar uma nova senha.
             </p>
 
             <form className="mt-6 flex flex-col gap-5" onSubmit={handleResetSubmit} noValidate>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="reset-email" className="text-sm font-medium text-slate-700">
+                <label htmlFor="reset-email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   E-mail
                 </label>
                 <input
@@ -256,23 +261,23 @@ export default function Login() {
                   onChange={(e) => setResetEmail(e.target.value)}
                   aria-describedby={resetErrors.email ? 'reset-email-erro' : undefined}
                   aria-invalid={Boolean(resetErrors.email)}
-                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
                 {resetErrors.email && (
-                  <p id="reset-email-erro" className="text-sm text-rose-600">
+                  <p id="reset-email-erro" className="text-sm text-rose-600 dark:text-rose-400">
                     {resetErrors.email}
                   </p>
                 )}
               </div>
 
               {resetStatus?.type === 'error' && (
-                <p role="alert" className="text-sm text-rose-600">
+                <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">
                   {resetStatus.message}
                 </p>
               )}
 
               {resetStatus?.type === 'success' && (
-                <p role="status" className="text-sm font-medium text-emerald-700">
+                <p role="status" className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
                   {resetStatus.message}
                 </p>
               )}

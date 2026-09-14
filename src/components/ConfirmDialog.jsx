@@ -6,8 +6,18 @@ import Button from './Button'
 const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
 const VARIANTS = {
-  danger: { Icon: AlertTriangle, iconBg: 'bg-rose-50', iconColor: 'text-rose-600', confirmVariant: 'danger' },
-  info: { Icon: Link2, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', confirmVariant: 'primary' },
+  danger: {
+    Icon: AlertTriangle,
+    iconBg: 'bg-rose-50 dark:bg-rose-950',
+    iconColor: 'text-rose-600 dark:text-rose-400',
+    confirmVariant: 'danger',
+  },
+  info: {
+    Icon: Link2,
+    iconBg: 'bg-emerald-50 dark:bg-emerald-950',
+    iconColor: 'text-emerald-600 dark:text-emerald-400',
+    confirmVariant: 'primary',
+  },
 }
 
 /**
@@ -90,7 +100,7 @@ export default function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-description"
-        className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-lg"
+        className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-lg dark:bg-slate-900 dark:shadow-none dark:ring-1 dark:ring-slate-800"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start gap-3">
@@ -98,10 +108,10 @@ export default function ConfirmDialog({
             <Icon aria-hidden="true" className={iconColor} size={20} />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 id="confirm-dialog-title" className="text-lg font-semibold text-slate-900">
+            <h2 id="confirm-dialog-title" className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               {title}
             </h2>
-            <p id="confirm-dialog-description" className="mt-1 text-sm text-slate-500">
+            <p id="confirm-dialog-description" className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {description}
             </p>
           </div>

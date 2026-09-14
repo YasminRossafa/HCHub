@@ -92,18 +92,19 @@ export default function Report() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-slate-900">Relatório para o professor</h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Relatório para o professor</h1>
+      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         Gere um PDF ou um link com o resumo das suas horas validadas para enviar ao professor responsável.
       </p>
 
       <section aria-labelledby="incluido-heading" className="mt-8">
-        <h2 id="incluido-heading" className="text-lg font-semibold text-slate-800">
+        <h2 id="incluido-heading" className="text-lg font-semibold text-slate-800 dark:text-slate-200">
           O que será incluído
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Somente certificados com status <strong className="font-semibold text-slate-700">validado</strong> entram
-          no relatório — são os únicos já confirmados pelo professor.
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Somente certificados com status{' '}
+          <strong className="font-semibold text-slate-700 dark:text-slate-200">validado</strong> entram no
+          relatório — são os únicos já confirmados pelo professor.
         </p>
 
         {certificatesLoading ? (
@@ -130,7 +131,7 @@ export default function Report() {
               })}
             </ul>
 
-            <h3 className="mt-8 text-base font-semibold text-slate-800">
+            <h3 className="mt-8 text-base font-semibold text-slate-800 dark:text-slate-200">
               Certificados incluídos ({validated.length})
             </h3>
             <ul className="mt-3 flex flex-col gap-3">
@@ -139,7 +140,7 @@ export default function Report() {
                 return (
                   <li
                     key={cert.id}
-                    className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100"
+                    className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800"
                   >
                     <img
                       src={cert.anexoUrl}
@@ -147,8 +148,8 @@ export default function Report() {
                       className="h-14 w-14 shrink-0 rounded-lg object-cover"
                     />
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-slate-900">{cert.titulo}</p>
-                      <p className="text-sm text-slate-500">
+                      <p className="truncate font-medium text-slate-900 dark:text-slate-100">{cert.titulo}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
                         {category?.label ?? cert.categoria} · {cert.cargaHoraria}h · {formatDate(cert.data)}
                       </p>
                     </div>
@@ -163,9 +164,9 @@ export default function Report() {
       {hasValidated && (
         <section
           aria-labelledby="acoes-heading"
-          className="mt-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 sm:p-6"
+          className="mt-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 sm:p-6 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800"
         >
-          <h2 id="acoes-heading" className="text-lg font-semibold text-slate-800">
+          <h2 id="acoes-heading" className="text-lg font-semibold text-slate-800 dark:text-slate-200">
             Gerar e compartilhar
           </h2>
 
@@ -187,19 +188,19 @@ export default function Report() {
           </div>
 
           {pdfError && (
-            <p role="alert" className="mt-3 text-sm text-rose-600">
+            <p role="alert" className="mt-3 text-sm text-rose-600 dark:text-rose-400">
               {pdfError}
             </p>
           )}
 
-          <p className="mt-3 text-sm text-slate-500">
+          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
             O e-mail abre seu aplicativo com o texto já pronto — como não há um servidor para enviar arquivos, você
             precisa anexar o PDF baixado manualmente antes de enviar.
           </p>
 
           {shareResult && (
-            <div className="mt-4 flex flex-col gap-2 rounded-xl border border-slate-200 p-3">
-              <label htmlFor="share-link" className="text-sm font-medium text-slate-700">
+            <div className="mt-4 flex flex-col gap-2 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+              <label htmlFor="share-link" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Link compartilhável (somente leitura)
               </label>
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -209,17 +210,17 @@ export default function Report() {
                   readOnly
                   value={shareResult.url}
                   onFocus={(e) => e.target.select()}
-                  className="w-full min-w-0 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 focus-visible:border-emerald-500"
+                  className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                 />
                 <Button type="button" variant="secondary" size="sm" onClick={handleCopyLink} className="shrink-0">
                   {copyLabel}
                 </Button>
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 Qualquer pessoa com este link poderá ver este resumo — não é necessário login.
               </p>
               {shareResult.wasCapped && (
-                <p className="flex items-start gap-2 text-sm text-amber-800">
+                <p className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-300">
                   <AlertTriangle aria-hidden="true" size={16} className="mt-0.5 shrink-0" />
                   Para manter o link em um tamanho seguro, apenas os {shareResult.includedCount} certificados mais
                   recentes (de {shareResult.totalCount}) foram incluídos. Baixe o PDF para ver o relatório completo.

@@ -4,7 +4,8 @@ const VARIANT_CLASSES = {
   primary:
     'bg-emerald-600 text-white shadow-md shadow-emerald-900/10 hover:bg-emerald-700 active:bg-emerald-800',
   secondary:
-    'bg-white text-slate-900 border-2 border-slate-300 hover:border-slate-400 hover:bg-slate-50 active:bg-slate-100',
+    'bg-white text-slate-900 border-2 border-slate-300 hover:border-slate-400 hover:bg-slate-50 active:bg-slate-100 ' +
+    'dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:hover:border-slate-500 dark:hover:bg-slate-700 dark:active:bg-slate-600',
   danger:
     'bg-rose-600 text-white shadow-md shadow-rose-900/10 hover:bg-rose-700 active:bg-rose-800',
 }

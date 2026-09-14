@@ -90,7 +90,7 @@ export default function History() {
         <div
           role="status"
           aria-live="polite"
-          className="mb-6 flex items-center justify-between gap-3 rounded-2xl bg-emerald-50 px-4 py-3 text-emerald-800"
+          className="mb-6 flex items-center justify-between gap-3 rounded-2xl bg-emerald-50 px-4 py-3 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
         >
           <span className="flex items-center gap-2 text-sm font-medium">
             <CheckCircle2 aria-hidden="true" size={18} />
@@ -100,7 +100,7 @@ export default function History() {
             type="button"
             onClick={() => setFlash(null)}
             aria-label="Fechar aviso"
-            className="shrink-0 rounded-full p-1 hover:bg-emerald-100"
+            className="shrink-0 rounded-full p-1 hover:bg-emerald-100 dark:hover:bg-emerald-900"
           >
             <X aria-hidden="true" size={16} />
           </button>
@@ -108,8 +108,8 @@ export default function History() {
       )}
 
       <header>
-        <h1 className="text-2xl font-bold text-slate-900">Histórico de atividades</h1>
-        <p className="text-sm text-slate-500">Acompanhe todos os certificados registrados.</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Histórico de atividades</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Acompanhe todos os certificados registrados.</p>
       </header>
 
       {certificatesLoading && (
@@ -119,16 +119,16 @@ export default function History() {
       )}
 
       {!certificatesLoading && hasAnyCertificates && (
-        <div className="mt-6 flex flex-col gap-5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:p-5">
+        <div className="mt-6 flex flex-col gap-5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:p-5 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="busca" className="text-sm font-medium text-slate-700">
+            <label htmlFor="busca" className="text-sm font-medium text-slate-700 dark:text-slate-300">
               Buscar por título
             </label>
             <div className="relative">
               <Search
                 aria-hidden="true"
                 size={18}
-                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
+                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-400 dark:text-slate-500"
               />
               <input
                 id="busca"
@@ -136,13 +136,13 @@ export default function History() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Ex.: Semana de informática"
-                className="w-full rounded-xl border border-slate-300 py-2.5 pr-4 pl-10 text-slate-900 focus-visible:border-emerald-500"
+                className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pr-4 pl-10 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
           </div>
 
           <fieldset>
-            <legend className="text-sm font-medium text-slate-700">Categoria</legend>
+            <legend className="text-sm font-medium text-slate-700 dark:text-slate-300">Categoria</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               <ChipRadio
                 name="categoria-filtro"
@@ -166,7 +166,7 @@ export default function History() {
           </fieldset>
 
           <fieldset>
-            <legend className="text-sm font-medium text-slate-700">Status</legend>
+            <legend className="text-sm font-medium text-slate-700 dark:text-slate-300">Status</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {STATUS_OPTIONS.map((option) => (
                 <ChipRadio
@@ -197,7 +197,7 @@ export default function History() {
             />
           ) : (
             <>
-              <p className="mb-3 text-sm text-slate-500">
+              <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
                 {filtered.length} de {certificados.length} certificado{certificados.length === 1 ? '' : 's'}
                 {hasFiltersApplied ? ' (filtrado)' : ''}
               </p>
@@ -232,7 +232,7 @@ export default function History() {
         }}
       >
         {deleteError && (
-          <p role="alert" className="text-sm text-rose-600">
+          <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">
             {deleteError}
           </p>
         )}
