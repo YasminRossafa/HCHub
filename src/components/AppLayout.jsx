@@ -1,6 +1,7 @@
 import { ClipboardList, FileText, LayoutDashboard, LogOut, PlusCircle, Settings } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { signOut } from '../firebase/authService'
+import ThemeToggle from './ThemeToggle'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Painel', icon: LayoutDashboard },
@@ -19,19 +20,23 @@ async function handleLogout() {
 
 function topLinkClass({ isActive }) {
   return `flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
-    isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+    isActive
+      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
+      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
   }`
 }
 
 function bottomLinkClass({ isActive }) {
   return `flex min-h-14 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
-    isActive ? 'text-emerald-700' : 'text-slate-500'
+    isActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
   }`
 }
 
 function iconLinkClass({ isActive }) {
   return `flex items-center justify-center rounded-xl p-2.5 transition-colors ${
-    isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+    isActive
+      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
+      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
   }`
 }
 
@@ -51,16 +56,17 @@ function iconLinkClass({ isActive }) {
 export default function AppLayout() {
   return (
     <div className="min-h-screen pb-20 sm:pb-0">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:hidden">
-        <span className="text-lg font-bold text-slate-900">HCHub</span>
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:hidden dark:border-slate-800 dark:bg-slate-900">
+        <span className="text-lg font-bold text-slate-900 dark:text-slate-100">HCHub</span>
         <div className="flex items-center gap-1">
+          <ThemeToggle />
           <NavLink to="/configuracoes" aria-label="Configurações" className={iconLinkClass}>
             <Settings aria-hidden="true" size={20} />
           </NavLink>
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
           >
             <LogOut aria-hidden="true" size={18} />
             Sair
@@ -68,9 +74,9 @@ export default function AppLayout() {
         </div>
       </header>
 
-      <nav aria-label="Principal" className="sticky top-0 z-30 hidden border-b border-slate-200 bg-white sm:block">
+      <nav aria-label="Principal" className="sticky top-0 z-30 hidden border-b border-slate-200 bg-white sm:block dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-          <span className="text-lg font-bold text-slate-900">HCHub</span>
+          <span className="text-lg font-bold text-slate-900 dark:text-slate-100">HCHub</span>
           <div className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => (
               <NavLink key={item.to} to={item.to} className={topLinkClass}>
@@ -82,10 +88,11 @@ export default function AppLayout() {
               <Settings aria-hidden="true" size={18} />
               Configurações
             </NavLink>
+            <ThemeToggle className="ml-2" />
             <button
               type="button"
               onClick={handleLogout}
-              className="ml-2 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+              className="ml-2 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
             >
               <LogOut aria-hidden="true" size={18} />
               Sair
@@ -98,7 +105,7 @@ export default function AppLayout() {
 
       <nav
         aria-label="Principal"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] sm:hidden dark:border-slate-800 dark:bg-slate-900"
       >
         <div className="grid grid-cols-4">
           {NAV_ITEMS.map((item) => (

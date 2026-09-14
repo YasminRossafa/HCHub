@@ -40,8 +40,8 @@ export default function Dashboard() {
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Olá, {aluno.nome}</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Olá, {aluno.nome}</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {aluno.curso} · Ingresso em {aluno.anoIngresso}
           </p>
         </div>
@@ -67,7 +67,7 @@ export default function Dashboard() {
           </div>
 
           <section aria-labelledby="categorias-heading" className="mt-8">
-            <h2 id="categorias-heading" className="text-lg font-semibold text-slate-800">
+            <h2 id="categorias-heading" className="text-lg font-semibold text-slate-800 dark:text-slate-200">
               Progresso por categoria
             </h2>
 

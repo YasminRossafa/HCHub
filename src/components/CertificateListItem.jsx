@@ -11,7 +11,7 @@ export default function CertificateListItem({ certificate, onDeleteRequest }) {
   const Icon = category?.icon
 
   return (
-    <li className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:p-5">
+    <li className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:p-5 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
           {Icon && (
@@ -22,9 +22,9 @@ export default function CertificateListItem({ certificate, onDeleteRequest }) {
             </span>
           )}
           <div className="min-w-0">
-            <p className="break-words font-semibold text-slate-900">{certificate.titulo}</p>
-            <p className="text-sm text-slate-500">{category?.label ?? certificate.categoria}</p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+            <p className="break-words font-semibold text-slate-900 dark:text-slate-100">{certificate.titulo}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{category?.label ?? certificate.categoria}</p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
               <span className="inline-flex items-center gap-1">
                 <Clock3 aria-hidden="true" size={14} />
                 {certificate.cargaHoraria}h
@@ -54,7 +54,7 @@ export default function CertificateListItem({ certificate, onDeleteRequest }) {
               type="button"
               variant="secondary"
               size="sm"
-              className="text-rose-700 hover:border-rose-300 hover:bg-rose-50"
+              className="text-rose-700 hover:border-rose-300 hover:bg-rose-50 dark:text-rose-400 dark:hover:border-rose-800 dark:hover:bg-rose-950"
               onClick={onDeleteRequest}
               aria-label={`Excluir ${certificate.titulo}`}
             >

@@ -35,7 +35,7 @@ function ReviewActionsSlot({ certificateTitle }) {
         aria-disabled="true"
         title="Validação pelo professor — disponível em breve"
         onClick={handlePlaceholderClick}
-        className="inline-flex items-center gap-1.5 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 opacity-60 cursor-not-allowed"
+        className="inline-flex items-center gap-1.5 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 opacity-60 cursor-not-allowed dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-400"
       >
         <CheckCircle2 aria-hidden="true" size={16} />
         Validar
@@ -45,7 +45,7 @@ function ReviewActionsSlot({ certificateTitle }) {
         aria-disabled="true"
         title="Rejeição pelo professor — disponível em breve"
         onClick={handlePlaceholderClick}
-        className="inline-flex items-center gap-1.5 rounded-xl border-2 border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 opacity-60 cursor-not-allowed"
+        className="inline-flex items-center gap-1.5 rounded-xl border-2 border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 opacity-60 cursor-not-allowed dark:border-rose-800 dark:bg-rose-950 dark:text-rose-400"
       >
         <XCircle aria-hidden="true" size={16} />
         Rejeitar
@@ -95,7 +95,7 @@ export default function ProfessorPanel() {
   const overall = getOverallProgress(aluno, certificados)
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="bg-slate-900 px-4 py-2.5 text-center text-sm font-medium text-white">
         <span className="inline-flex items-center gap-2">
           <Eye aria-hidden="true" size={16} />
@@ -103,16 +103,16 @@ export default function ProfessorPanel() {
         </span>
       </div>
 
-      <nav aria-label="Principal" className="border-b border-slate-200 bg-white">
+      <nav aria-label="Principal" className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center px-4 py-4 sm:px-6">
-          <span className="text-lg font-bold text-slate-900">HCHub</span>
+          <span className="text-lg font-bold text-slate-900 dark:text-slate-100">HCHub</span>
         </div>
       </nav>
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <header>
-          <h1 className="text-2xl font-bold text-slate-900">{aluno.nome}</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{aluno.nome}</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {aluno.curso} · Ingresso em {aluno.anoIngresso}
           </p>
         </header>
@@ -127,7 +127,7 @@ export default function ProfessorPanel() {
         </div>
 
         <section aria-labelledby="categorias-heading" className="mt-8">
-          <h2 id="categorias-heading" className="text-lg font-semibold text-slate-800">
+          <h2 id="categorias-heading" className="text-lg font-semibold text-slate-800 dark:text-slate-200">
             Progresso por categoria
           </h2>
           <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -140,12 +140,14 @@ export default function ProfessorPanel() {
         </section>
 
         <section aria-labelledby="certificados-heading" className="mt-8">
-          <h2 id="certificados-heading" className="text-lg font-semibold text-slate-800">
+          <h2 id="certificados-heading" className="text-lg font-semibold text-slate-800 dark:text-slate-200">
             Certificados validados ({certificados.length})
           </h2>
 
           {certificados.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">Nenhum certificado validado foi incluído neste link.</p>
+            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+              Nenhum certificado validado foi incluído neste link.
+            </p>
           ) : (
             <ul className="mt-4 flex flex-col gap-3">
               {certificados.map((cert) => {
@@ -154,7 +156,7 @@ export default function ProfessorPanel() {
                 return (
                   <li
                     key={cert.id}
-                    className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:flex-row sm:items-center"
+                    className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:flex-row sm:items-center dark:bg-slate-900 dark:shadow-none dark:ring-slate-800"
                   >
                     <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center">
                       {cert.anexoUrl && (
@@ -165,8 +167,8 @@ export default function ProfessorPanel() {
                         />
                       )}
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-900">{cert.titulo}</p>
-                        <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
+                        <p className="font-semibold text-slate-900 dark:text-slate-100">{cert.titulo}</p>
+                        <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
                           {Icon && <Icon aria-hidden="true" size={14} className={category.text} />}
                           {category?.label ?? cert.categoria} · {cert.cargaHoraria}h · {formatDate(cert.data)}
                         </p>

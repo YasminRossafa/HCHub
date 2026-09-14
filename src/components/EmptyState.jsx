@@ -16,12 +16,12 @@ export default function EmptyState({
   onAction,
 }) {
   return (
-    <div className="flex flex-col items-center rounded-3xl border-2 border-dashed border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
-      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-        <Icon aria-hidden="true" className="text-emerald-600" size={32} />
+    <div className="flex flex-col items-center rounded-3xl border-2 border-dashed border-slate-200 bg-white px-6 py-14 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
+      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950">
+        <Icon aria-hidden="true" className="text-emerald-600 dark:text-emerald-400" size={32} />
       </span>
-      <h2 className="mt-5 text-lg font-semibold text-slate-900">{title}</h2>
-      <p className="mt-2 max-w-sm text-sm text-slate-500">{description}</p>
+      <h2 className="mt-5 text-lg font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
+      <p className="mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">{description}</p>
       {onAction ? (
         <Button type="button" variant="primary" onClick={onAction} className="mt-6">
           {actionLabel}

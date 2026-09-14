@@ -191,22 +191,22 @@ export default function CertificateForm() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-slate-900">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
         {isEditing ? 'Editar certificado' : 'Registrar nova atividade'}
       </h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         {isEditing
           ? 'Alterar os dados envia o certificado novamente para revisão.'
           : 'Preencha os dados do certificado. Ele ficará pendente até ser validado.'}
       </p>
 
-      <div className="mt-6 rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-8">
+      <div className="mt-6 rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-8 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800">
         {loadState === 'loading' ? (
           <LoadingState label="Carregando certificado…" />
         ) : (
           <form onSubmit={handleSubmit} noValidate aria-busy={isSubmitting} className="flex flex-col gap-6">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="titulo" className="text-sm font-medium text-slate-700">
+              <label htmlFor="titulo" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Título
               </label>
               <input
@@ -217,10 +217,10 @@ export default function CertificateForm() {
                 onChange={(e) => setTitulo(e.target.value)}
                 aria-describedby={errors.titulo ? 'titulo-erro' : undefined}
                 aria-invalid={Boolean(errors.titulo)}
-                className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
               {errors.titulo && (
-                <p id="titulo-erro" className="text-sm text-rose-600">
+                <p id="titulo-erro" className="text-sm text-rose-600 dark:text-rose-400">
                   {errors.titulo}
                 </p>
               )}
@@ -228,7 +228,7 @@ export default function CertificateForm() {
 
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="categoria" className="text-sm font-medium text-slate-700">
+                <label htmlFor="categoria" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Categoria
                 </label>
                 <select
@@ -238,7 +238,7 @@ export default function CertificateForm() {
                   onChange={(e) => setCategoria(e.target.value)}
                   aria-describedby={errors.categoria ? 'categoria-erro' : undefined}
                   aria-invalid={Boolean(errors.categoria)}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   <option value="" disabled>
                     Selecione uma categoria
@@ -250,14 +250,14 @@ export default function CertificateForm() {
                   ))}
                 </select>
                 {errors.categoria && (
-                  <p id="categoria-erro" className="text-sm text-rose-600">
+                  <p id="categoria-erro" className="text-sm text-rose-600 dark:text-rose-400">
                     {errors.categoria}
                   </p>
                 )}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="cargaHoraria" className="text-sm font-medium text-slate-700">
+                <label htmlFor="cargaHoraria" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Carga horária
                 </label>
                 <div className="flex items-center gap-2">
@@ -271,12 +271,12 @@ export default function CertificateForm() {
                     onChange={(e) => setCargaHoraria(e.target.value)}
                     aria-describedby={errors.cargaHoraria ? 'cargaHoraria-erro' : undefined}
                     aria-invalid={Boolean(errors.cargaHoraria)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
-                  <span className="text-sm text-slate-500">horas</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">horas</span>
                 </div>
                 {errors.cargaHoraria && (
-                  <p id="cargaHoraria-erro" className="text-sm text-rose-600">
+                  <p id="cargaHoraria-erro" className="text-sm text-rose-600 dark:text-rose-400">
                     {errors.cargaHoraria}
                   </p>
                 )}
@@ -284,7 +284,7 @@ export default function CertificateForm() {
             </div>
 
             <div className="flex flex-col gap-1.5 sm:w-1/2 sm:pr-3">
-              <label htmlFor="data" className="text-sm font-medium text-slate-700">
+              <label htmlFor="data" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Data
               </label>
               <input
@@ -296,18 +296,18 @@ export default function CertificateForm() {
                 onChange={(e) => setData(e.target.value)}
                 aria-describedby={errors.data ? 'data-erro' : undefined}
                 aria-invalid={Boolean(errors.data)}
-                className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
               />
               {errors.data && (
-                <p id="data-erro" className="text-sm text-rose-600">
+                <p id="data-erro" className="text-sm text-rose-600 dark:text-rose-400">
                   {errors.data}
                 </p>
               )}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="observacoes" className="text-sm font-medium text-slate-700">
-                Observações <span className="font-normal text-slate-400">(opcional)</span>
+              <label htmlFor="observacoes" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Observações <span className="font-normal text-slate-400 dark:text-slate-500">(opcional)</span>
               </label>
               <textarea
                 id="observacoes"
@@ -315,12 +315,12 @@ export default function CertificateForm() {
                 rows={3}
                 value={observacoes}
                 onChange={(e) => setObservacoes(e.target.value)}
-                className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="anexo" className="text-sm font-medium text-slate-700">
+              <label htmlFor="anexo" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Foto do certificado
               </label>
               <input
@@ -332,32 +332,32 @@ export default function CertificateForm() {
                 onChange={handleFileChange}
                 aria-describedby={errors.anexo ? 'anexo-erro' : 'anexo-dica'}
                 aria-invalid={Boolean(errors.anexo)}
-                className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 focus-visible:border-emerald-500"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:file:bg-slate-700 dark:file:text-slate-200"
               />
-              <p id="anexo-dica" className="text-sm text-slate-500">
+              <p id="anexo-dica" className="text-sm text-slate-500 dark:text-slate-400">
                 Obrigatória para confirmar as horas. JPEG ou PNG, até 5MB — a imagem é comprimida
                 automaticamente ao ser enviada.
               </p>
               {errors.anexo && (
-                <p id="anexo-erro" className="text-sm text-rose-600">
+                <p id="anexo-erro" className="text-sm text-rose-600 dark:text-rose-400">
                   {errors.anexo}
                 </p>
               )}
               {isProcessingFile && (
-                <p role="status" aria-live="polite" className="text-sm text-slate-500">
+                <p role="status" aria-live="polite" className="text-sm text-slate-500 dark:text-slate-400">
                   Comprimindo imagem…
                 </p>
               )}
 
               {previewUrl && !isProcessingFile && (
-                <div className="mt-1 flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
+                <div className="mt-1 flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
                   <div className="flex min-w-0 items-center gap-3">
                     <img
                       src={previewUrl}
                       alt="Pré-visualização da foto do certificado"
                       className="h-12 w-12 shrink-0 rounded-lg object-cover"
                     />
-                    <span className="truncate text-sm text-slate-600">Foto anexada</span>
+                    <span className="truncate text-sm text-slate-600 dark:text-slate-400">Foto anexada</span>
                   </div>
                   <Button type="button" variant="secondary" size="sm" onClick={handleRemoveAnexo}>
                     <X aria-hidden="true" size={16} />
@@ -368,12 +368,12 @@ export default function CertificateForm() {
             </div>
 
             {submitError && (
-              <p role="alert" className="text-sm text-rose-600">
+              <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">
                 {submitError}
               </p>
             )}
             {isSubmitting && (
-              <p role="status" aria-live="polite" className="text-sm text-slate-500">
+              <p role="status" aria-live="polite" className="text-sm text-slate-500 dark:text-slate-400">
                 Enviando certificado…
               </p>
             )}

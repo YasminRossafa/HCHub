@@ -19,7 +19,7 @@ export default function OverallProgressHero({ validatedHours, pendingHours, requ
   return (
     <section
       aria-labelledby="overall-progress-heading"
-      className="rounded-3xl bg-slate-900 p-6 text-white shadow-lg shadow-slate-900/20 sm:p-8"
+      className="rounded-3xl bg-slate-900 p-6 text-white shadow-lg shadow-slate-900/20 sm:p-8 dark:bg-slate-800 dark:shadow-emerald-950/40 dark:ring-1 dark:ring-emerald-400/20"
     >
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>

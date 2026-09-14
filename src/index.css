@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/*
+ * Tailwind v4 is CSS-first (no tailwind.config.js) — this is the v4
+ * equivalent of `darkMode: 'class'`. ThemeContext toggles the `dark` class
+ * on <html>, and every `dark:` variant in the app resolves against it
+ * instead of the default `prefers-color-scheme` media query.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
@@ -8,10 +16,19 @@ html {
   color-scheme: light;
 }
 
+html.dark {
+  color-scheme: dark;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-slate-50);
   color: var(--color-slate-900);
+}
+
+html.dark body {
+  background-color: var(--color-slate-950);
+  color: var(--color-slate-100);
 }
 
 /*

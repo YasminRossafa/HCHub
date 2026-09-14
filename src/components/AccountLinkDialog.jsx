@@ -60,7 +60,7 @@ export default function AccountLinkDialog({ linking, onLinked }) {
       onCancel={handleCancel}
     >
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="link-password" className="text-sm font-medium text-slate-700">
+        <label htmlFor="link-password" className="text-sm font-medium text-slate-700 dark:text-slate-300">
           Senha
         </label>
         <input
@@ -77,10 +77,10 @@ export default function AccountLinkDialog({ linking, onLinked }) {
           }}
           aria-describedby={dialogError ? 'link-password-erro' : undefined}
           aria-invalid={Boolean(dialogError)}
-          className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
         />
         {dialogError && (
-          <p id="link-password-erro" className="text-sm text-rose-600">
+          <p id="link-password-erro" className="text-sm text-rose-600 dark:text-rose-400">
             {dialogError}
           </p>
         )}

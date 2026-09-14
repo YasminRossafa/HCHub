@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import AccountLinkDialog from '../components/AccountLinkDialog'
 import Button from '../components/Button'
 import GoogleIcon from '../components/GoogleIcon'
+import ThemeToggle from '../components/ThemeToggle'
 import { getAuthErrorMessage, signInWithGoogle, signUpWithEmail } from '../firebase/authService'
 import { useAccountLinking } from '../firebase/useAccountLinking'
 
@@ -91,20 +92,21 @@ export default function Signup() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
-      <div className="rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-10">
+      <div className="flex justify-end">
+        <ThemeToggle />
+      </div>
+
+      <div className="mt-4 rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-10 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800">
         <div className="flex items-center gap-3">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
-            <GraduationCap aria-hidden="true" className="text-emerald-600" size={26} />
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950">
+            <GraduationCap aria-hidden="true" className="text-emerald-600 dark:text-emerald-400" size={26} />
           </span>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Criar conta no HCHub</h1>
-            <p className="text-sm text-slate-500">Cadastre-se para começar a acompanhar suas horas complementares.</p>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Criar conta no HCHub</h1>
         </div>
 
-        <form className="mt-8 flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
+        <form className="mt-6 flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="email" className="text-sm font-medium text-slate-700">
+            <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
               E-mail
             </label>
             <input
@@ -116,17 +118,17 @@ export default function Signup() {
               onChange={(e) => setEmail(e.target.value)}
               aria-describedby={errors.email ? 'email-erro' : undefined}
               aria-invalid={Boolean(errors.email)}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
             {errors.email && (
-              <p id="email-erro" className="text-sm text-rose-600">
+              <p id="email-erro" className="text-sm text-rose-600 dark:text-rose-400">
                 {errors.email}
               </p>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-sm font-medium text-slate-700">
+            <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-slate-300">
               Senha
             </label>
             <input
@@ -138,17 +140,17 @@ export default function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               aria-describedby={errors.password ? 'password-erro' : undefined}
               aria-invalid={Boolean(errors.password)}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
             {errors.password && (
-              <p id="password-erro" className="text-sm text-rose-600">
+              <p id="password-erro" className="text-sm text-rose-600 dark:text-rose-400">
                 {errors.password}
               </p>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700">
+            <label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700 dark:text-slate-300">
               Confirmar senha
             </label>
             <input
@@ -160,23 +162,23 @@ export default function Signup() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               aria-describedby={errors.confirmPassword ? 'confirmPassword-erro' : undefined}
               aria-invalid={Boolean(errors.confirmPassword)}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
             {errors.confirmPassword && (
-              <p id="confirmPassword-erro" className="text-sm text-rose-600">
+              <p id="confirmPassword-erro" className="text-sm text-rose-600 dark:text-rose-400">
                 {errors.confirmPassword}
               </p>
             )}
           </div>
 
           {formError && (
-            <p role="alert" className="text-sm text-rose-600">
+            <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">
               {formError}
             </p>
           )}
 
           {successMessage && (
-            <p role="status" className="text-sm font-medium text-emerald-700">
+            <p role="status" className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
               {successMessage}
             </p>
           )}
@@ -187,9 +189,9 @@ export default function Signup() {
         </form>
 
         <div className="mt-6 flex items-center gap-3" role="separator">
-          <span className="h-px flex-1 bg-slate-200" />
-          <span className="text-sm text-slate-500">ou</span>
-          <span className="h-px flex-1 bg-slate-200" />
+          <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+          <span className="text-sm text-slate-500 dark:text-slate-400">ou</span>
+          <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
         </div>
 
         <Button
@@ -203,9 +205,12 @@ export default function Signup() {
           {isGoogleSubmitting ? 'Conectando…' : 'Cadastrar com Google'}
         </Button>
 
-        <p className="mt-8 text-center text-sm text-slate-500">
+        <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
           Já tem conta?{' '}
-          <Link to="/login" className="font-semibold text-emerald-700 hover:text-emerald-800">
+          <Link
+            to="/login"
+            className="font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+          >
             Entrar
           </Link>
         </p>

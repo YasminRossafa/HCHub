@@ -2,8 +2,10 @@ import { GraduationCap } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
+import ThemeToggle from '../components/ThemeToggle'
 import { CATEGORIES, DEFAULT_METAS } from '../constants/categories'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { saveStudentProfile } from '../firebase/studentService'
 
 const CURRENT_YEAR = new Date().getFullYear()
@@ -11,6 +13,7 @@ const CURRENT_YEAR = new Date().getFullYear()
 export default function Onboarding() {
   const navigate = useNavigate()
   const { user, refreshStudentProfile } = useAuth()
+  const { preference: themePreference } = useTheme()
   const [nome, setNome] = useState('')
   const [curso, setCurso] = useState('')
   const [anoIngresso, setAnoIngresso] = useState(String(CURRENT_YEAR))
@@ -57,6 +60,7 @@ export default function Onboarding() {
         curso: curso.trim(),
         anoIngresso: Number(anoIngresso),
         metas: Object.fromEntries(CATEGORIES.map((c) => [c.key, Number(metas[c.key])])),
+        temaPreferido: themePreference,
       })
       await refreshStudentProfile(user.uid)
       navigate('/dashboard')
@@ -70,21 +74,27 @@ export default function Onboarding() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-4 py-12">
-      <div className="rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-10">
+      <div className="flex justify-end">
+        <ThemeToggle />
+      </div>
+
+      <div className="mt-4 rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-10 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800">
         <div className="flex items-center gap-3">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
-            <GraduationCap aria-hidden="true" className="text-emerald-600" size={26} />
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950">
+            <GraduationCap aria-hidden="true" className="text-emerald-600 dark:text-emerald-400" size={26} />
           </span>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Bem-vindo(a) ao HCHub</h1>
-            <p className="text-sm text-slate-500">Vamos configurar seu perfil para acompanhar suas horas complementares.</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Bem-vindo(a) ao HCHub</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Vamos configurar seu perfil para acompanhar suas horas complementares.
+            </p>
           </div>
         </div>
 
         <form className="mt-8 flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label htmlFor="nome" className="text-sm font-medium text-slate-700">
+              <label htmlFor="nome" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Nome
               </label>
               <input
@@ -95,17 +105,17 @@ export default function Onboarding() {
                 onChange={(e) => setNome(e.target.value)}
                 aria-describedby={errors.nome ? 'nome-erro' : undefined}
                 aria-invalid={Boolean(errors.nome)}
-                className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
               {errors.nome && (
-                <p id="nome-erro" className="text-sm text-rose-600">
+                <p id="nome-erro" className="text-sm text-rose-600 dark:text-rose-400">
                   {errors.nome}
                 </p>
               )}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="curso" className="text-sm font-medium text-slate-700">
+              <label htmlFor="curso" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Curso
               </label>
               <input
@@ -116,17 +126,17 @@ export default function Onboarding() {
                 onChange={(e) => setCurso(e.target.value)}
                 aria-describedby={errors.curso ? 'curso-erro' : undefined}
                 aria-invalid={Boolean(errors.curso)}
-                className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
               {errors.curso && (
-                <p id="curso-erro" className="text-sm text-rose-600">
+                <p id="curso-erro" className="text-sm text-rose-600 dark:text-rose-400">
                   {errors.curso}
                 </p>
               )}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="anoIngresso" className="text-sm font-medium text-slate-700">
+              <label htmlFor="anoIngresso" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Ano de ingresso
               </label>
               <input
@@ -138,19 +148,21 @@ export default function Onboarding() {
                 onChange={(e) => setAnoIngresso(e.target.value)}
                 aria-describedby={errors.anoIngresso ? 'ano-erro' : undefined}
                 aria-invalid={Boolean(errors.anoIngresso)}
-                className="rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
               {errors.anoIngresso && (
-                <p id="ano-erro" className="text-sm text-rose-600">
+                <p id="ano-erro" className="text-sm text-rose-600 dark:text-rose-400">
                   {errors.anoIngresso}
                 </p>
               )}
             </div>
           </div>
 
-          <fieldset className="rounded-2xl border border-slate-200 p-4">
-            <legend className="px-1 text-sm font-semibold text-slate-800">Metas de horas por categoria</legend>
-            <p className="px-1 text-sm text-slate-500">
+          <fieldset className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+            <legend className="px-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
+              Metas de horas por categoria
+            </legend>
+            <p className="px-1 text-sm text-slate-500 dark:text-slate-400">
               Valores padrão preenchidos automaticamente — ajuste conforme as regras do seu curso.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -160,7 +172,10 @@ export default function Onboarding() {
                 const errorId = `${fieldId}-erro`
                 return (
                   <div key={category.key} className="flex flex-col gap-1.5">
-                    <label htmlFor={fieldId} className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                    <label
+                      htmlFor={fieldId}
+                      className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300"
+                    >
                       <Icon aria-hidden="true" className={category.text} size={16} />
                       {category.label}
                     </label>
@@ -175,12 +190,12 @@ export default function Onboarding() {
                         onChange={(e) => updateMeta(category.key, e.target.value)}
                         aria-describedby={errors[category.key] ? errorId : undefined}
                         aria-invalid={Boolean(errors[category.key])}
-                        className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                       />
-                      <span className="text-sm text-slate-500">horas</span>
+                      <span className="text-sm text-slate-500 dark:text-slate-400">horas</span>
                     </div>
                     {errors[category.key] && (
-                      <p id={errorId} className="text-sm text-rose-600">
+                      <p id={errorId} className="text-sm text-rose-600 dark:text-rose-400">
                         {errors[category.key]}
                       </p>
                     )}
@@ -191,7 +206,7 @@ export default function Onboarding() {
           </fieldset>
 
           {submitError && (
-            <p role="alert" className="text-sm text-rose-600">
+            <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">
               {submitError}
             </p>
           )}
