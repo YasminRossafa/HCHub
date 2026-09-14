@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-slate-50);
+  color: var(--color-slate-900);
+}
+
+/*
+ * Keep a strong, visible focus ring everywhere instead of removing outlines.
+ * Targets tags explicitly (not just `:focus-visible`) because Chromium's UA
+ * stylesheet sets `outline-color` on `a` with higher specificity than a bare
+ * `:focus-visible` selector, silently swapping our color back to its own default.
+ */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--color-emerald-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/*
+ * ChipRadio's actual control is a visually-hidden (sr-only, not display:none)
+ * radio input; draw the focus ring on its visible label sibling instead, or
+ * it would render on a 1px-clipped element and be imperceptible.
+ */
+.chip-radio-input:focus-visible + label {
+  outline: 3px solid var(--color-emerald-500);
+  outline-offset: 2px;
+}
