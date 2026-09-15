@@ -4,6 +4,7 @@ import { CATEGORIES_BY_KEY } from '../constants/categories'
 import { CERTIFICATE_STATUS_CONFIG } from '../constants/statusConfig'
 import { formatDate } from '../utils/date'
 import Button from './Button'
+import ExpandableCertificateImage from './ExpandableCertificateImage'
 import StatusBadge from './StatusBadge'
 
 export default function CertificateListItem({ certificate, onDeleteRequest }) {
@@ -14,6 +15,11 @@ export default function CertificateListItem({ certificate, onDeleteRequest }) {
     <li className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:p-5 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
+          <ExpandableCertificateImage
+            src={certificate.anexoUrl}
+            title={certificate.titulo}
+            className="h-14 w-14"
+          />
           {Icon && (
             <span
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${category.softBg}`}

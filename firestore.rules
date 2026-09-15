@@ -6,27 +6,29 @@ service cloud.firestore {
     match /students/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
 
-      // Certificates belong to the owning student only, for now. A professor
-      // opens a shareLinks/{token} document (see below) instead of reading
-      // this subcollection directly — once that flow is built, add an
-      // `allow read` clause here that checks a shareLinks doc whose
-      // `studentId` matches `uid`, e.g.:
-      //   allow read: if exists(/databases/$(database)/documents/shareLinks/$(request.query... or a passed token))
-      //     && get(...).data.studentId == uid;
-      // Left as a TODO(professor-access) since the panel isn't built yet.
+      // Certificates belong to the owning student only. The professor never
+      // reads this subcollection from the client: the /professor/:token panel
+      // goes through the `getStudentReportByToken` and
+      // `updateCertificateStatusByToken` Cloud Functions (functions/index.js),
+      // which run with Admin SDK privileges and use shareLinks/{token} as the
+      // access check — so no professor clause is needed (or wanted) here.
       match /certificados/{certId} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
       }
     }
 
-    // Lets a signed-in student create a share link pointing at themselves.
-    // Reading is intentionally denied for everyone (including the owner) —
-    // no professor-access flow consumes these yet. TODO(professor-access):
-    // once the panel is built, add a scoped `allow get` for an unauthenticated
-    // or professor request presenting a valid token, without opening `list`.
+    // A share link points a random token at its owning student. The owner
+    // can create links for themselves, and list/delete their own so the
+    // Report screen can enforce "one active link at a time" (revoke the old
+    // one before minting a new one). Reading by token (`get`) stays denied
+    // for everyone: the professor's lookup happens server-side in the Cloud
+    // Functions, so the client never needs — and must never get — a way to
+    // probe tokens. `update` is denied outright: a link is created or
+    // deleted, never edited.
     match /shareLinks/{token} {
       allow create: if request.auth != null && request.resource.data.studentId == request.auth.uid;
-      allow read, update, delete: if false;
+      allow list, delete: if request.auth != null && resource.data.studentId == request.auth.uid;
+      allow get, update: if false;
     }
 
     // Deny everything else by default.

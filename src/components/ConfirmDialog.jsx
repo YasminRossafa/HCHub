@@ -1,9 +1,8 @@
 import { AlertTriangle, Link2 } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Button from './Button'
-
-const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+import { useModalFocusTrap } from './useModalFocusTrap'
 
 const VARIANTS = {
   danger: {
@@ -46,46 +45,9 @@ export default function ConfirmDialog({
 }) {
   const dialogRef = useRef(null)
   const cancelButtonRef = useRef(null)
-  const previouslyFocusedRef = useRef(null)
   const { Icon, iconBg, iconColor, confirmVariant } = VARIANTS[variant]
 
-  useEffect(() => {
-    if (!open) return undefined
-
-    previouslyFocusedRef.current = document.activeElement
-    cancelButtonRef.current?.focus()
-
-    function handleKeyDown(event) {
-      if (event.key === 'Escape') {
-        if (isConfirming) return
-        event.preventDefault()
-        onCancel()
-        return
-      }
-      if (event.key !== 'Tab' || !dialogRef.current) return
-
-      const focusables = Array.from(dialogRef.current.querySelectorAll(FOCUSABLE_SELECTOR))
-      if (focusables.length === 0) return
-      const first = focusables[0]
-      const last = focusables[focusables.length - 1]
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      if (previouslyFocusedRef.current instanceof HTMLElement) {
-        previouslyFocusedRef.current.focus()
-      }
-    }
-  }, [open, onCancel, isConfirming])
+  useModalFocusTrap({ open, onClose: onCancel, containerRef: dialogRef, initialFocusRef: cancelButtonRef, disabled: isConfirming })
 
   if (!open) return null
 

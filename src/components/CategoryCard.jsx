@@ -3,14 +3,16 @@ import { PROGRESS_STATUS_CONFIG } from '../constants/statusConfig'
 import ProgressBar from './ProgressBar'
 import StatusBadge from './StatusBadge'
 
-/** `count`, when passed, appends "· N certificado(s)" — used by Report/ProfessorPanel. */
-export default function CategoryCard({ category, progress, count }) {
+/** `className` merges into the root `<li>` — used by Dashboard to apply a grid col-span when the adaptive category grid needs one (see utils/categoryGrid). */
+export default function CategoryCard({ category, progress, className = '' }) {
   const Icon = category.icon
   const { validatedHours, pendingHours, requiredHours, percent, pendingPercent, status } = progress
   const hasPending = pendingHours > 0
 
   return (
-    <li className="rounded-2xl bg-white p-5 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800">
+    <li
+      className={`rounded-2xl bg-white p-5 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800 ${className}`.trim()}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${category.softBg}`}>
@@ -30,11 +32,6 @@ export default function CategoryCard({ category, progress, count }) {
             {' + '}
             <span className="font-semibold text-amber-800 dark:text-amber-300">{pendingHours}h</span> pendentes
           </>
-        )}
-        {typeof count === 'number' && count > 0 && (
-          <span className="ml-1">
-            · {count} certificado{count === 1 ? '' : 's'}
-          </span>
         )}
       </p>
 

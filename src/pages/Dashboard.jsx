@@ -9,6 +9,7 @@ import LoadingState from '../components/LoadingState'
 import OverallProgressHero from '../components/OverallProgressHero'
 import { useAuth } from '../contexts/AuthContext'
 import { getCertificates } from '../firebase/certificateService'
+import { getCategoryCardSpanClassName, getCategoryGridClassName } from '../utils/categoryGrid'
 import { getActiveCategories, getCategoryProgress, getOverallProgress } from '../utils/progress'
 
 export default function Dashboard() {
@@ -72,12 +73,13 @@ export default function Dashboard() {
             </h2>
 
             {hasCertificates ? (
-              <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {activeCategories.map((category) => (
+              <ul className={`mt-4 grid gap-4 ${getCategoryGridClassName(activeCategories.length)}`}>
+                {activeCategories.map((category, index) => (
                   <CategoryCard
                     key={category.key}
                     category={category}
                     progress={getCategoryProgress(category.key, aluno, certificados)}
+                    className={getCategoryCardSpanClassName(activeCategories.length, index)}
                   />
                 ))}
               </ul>

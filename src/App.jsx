@@ -74,7 +74,8 @@ export default function App() {
           </RequireOnboarding>
         }
       />
-      <Route path="/painel" element={<ProfessorPanel />} />
+      {/* Public, unauthenticated: the share token in the URL is the whole credential (see ProfessorPanel). */}
+      <Route path="/professor/:token" element={<ProfessorPanel />} />
       <Route
         element={
           <RequireStudent>
