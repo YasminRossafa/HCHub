@@ -9,6 +9,15 @@
   <body>
     <div id="root"></div>
     <script defer src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+      if (!localStorage.getItem("seeb.settings")) {
+        localStorage.setItem(
+          "seeb.settings",
+          JSON.stringify({ widgetPositionPreset: "top-right" }),
+        );
+      }
+    </script>
+    <script src="https://seeb-widget.pages.dev/widget.js" defer></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
