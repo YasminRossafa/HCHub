@@ -1,4 +1,4 @@
-import { Award, Briefcase, FlaskConical, GraduationCap, HandHeart } from 'lucide-react'
+import { Award, Briefcase, FlaskConical, HandHeart } from 'lucide-react'
 
 /**
  * Single source of truth for the fixed set of complementary-hours categories.
@@ -19,17 +19,6 @@ export const CATEGORIES = [
     ring: 'ring-violet-200 dark:ring-violet-800/60',
     icon: HandHeart,
     defaultGoal: 100,
-  },
-  {
-    key: 'monitoria',
-    label: 'Monitoria',
-    color: 'amber',
-    text: 'text-amber-800 dark:text-amber-300',
-    solidBg: 'bg-amber-500 dark:bg-amber-500',
-    softBg: 'bg-amber-50 dark:bg-amber-950',
-    ring: 'ring-amber-200 dark:ring-amber-800/60',
-    icon: GraduationCap,
-    defaultGoal: 40,
   },
   {
     key: 'iniciacaoCientifica',
