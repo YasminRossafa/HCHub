@@ -57,8 +57,8 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen pb-20 sm:pb-0">
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:hidden dark:border-slate-800 dark:bg-slate-900">
-        <img src="/logo_extendida.png" alt="extended_logo" className='h-9 w-auto dark:hidden'/>
-        <img src="/logo_extendida_dark.png" alt="extended_logo_dark" className='hidden h-9 w-auto dark:block'/>
+        <img src="/logo.png" alt="logo" className='h-10 w-auto dark:hidden'/>
+        <img src="/logo_dark.png" alt="logo_dark" className='hidden h-10 w-auto dark:block'/>
         <div className="flex items-center gap-1">
           <ThemeToggle />
           <NavLink to="/configuracoes" aria-label="Configurações" className={iconLinkClass}>
