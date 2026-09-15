@@ -9,67 +9,6 @@
   <body>
     <div id="root"></div>
     <script defer src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-    <script>
-      (function () {
-        var LS_KEY = "seeb.settings";
-        var MOBILE_QUERY = "(max-width: 639px)";
-        var MOBILE_PRESET = "left-center";
-        var DESKTOP_PRESET = "top-right";
-
-        function presetFor(isMobile) {
-          return isMobile ? MOBILE_PRESET : DESKTOP_PRESET;
-        }
-
-        function readSettings() {
-          try {
-            return JSON.parse(localStorage.getItem(LS_KEY) || "{}");
-          } catch {
-            return {};
-          }
-        }
-
-        var lastAppliedIsMobile = window.matchMedia(MOBILE_QUERY).matches;
-
-        // Only seed once: a returning visitor's own saved/dragged position
-        // (widgetPositionPreset "custom", or any preset they picked
-        // themselves) must always win over our default.
-        if (!localStorage.getItem(LS_KEY)) {
-          localStorage.setItem(
-            LS_KEY,
-            JSON.stringify({
-              widgetPositionPreset: presetFor(lastAppliedIsMobile),
-            }),
-          );
-        }
-
-        function reapplyIfBreakpointCrossed() {
-          var isMobile = window.matchMedia(MOBILE_QUERY).matches;
-          if (isMobile === lastAppliedIsMobile) return;
-
-          var widget = document.querySelector("seeb-widget");
-          var settings = readSettings();
-          // Never override a position the visitor set themselves (dragged,
-          // or picked a different preset in the widget's own panel).
-          var isOurDefault =
-            settings.widgetPositionPreset === MOBILE_PRESET ||
-            settings.widgetPositionPreset === DESKTOP_PRESET;
-          if (!widget || !isOurDefault) {
-            lastAppliedIsMobile = isMobile;
-            return;
-          }
-
-          widget.currentSettings.widgetPositionPreset = presetFor(isMobile);
-          widget.currentSettings.widgetPositionX = null;
-          widget.currentSettings.widgetPositionY = null;
-          widget.applyWidgetPosition(widget.currentSettings);
-          widget.saveSettings();
-          lastAppliedIsMobile = isMobile;
-        }
-
-        window.addEventListener("resize", reapplyIfBreakpointCrossed);
-        window.addEventListener("orientationchange", reapplyIfBreakpointCrossed);
-      })();
-    </script>
     <script src="https://seeb-widget.pages.dev/widget.js" defer></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>

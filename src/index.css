@@ -57,3 +57,24 @@ textarea:focus-visible,
   outline: 3px solid var(--color-emerald-500);
   outline-offset: 2px;
 }
+
+/*
+ * VLibras's current widget (vlibras-plugin.js) has no vw-plugin-top-wrapper
+ * class — that's from its old embed. It renders into an open shadow root
+ * on #vlibras-access-wrapper, with the button itself positioned inside
+ * that shadow tree at `top: calc(50vh - 20px)`, which page CSS can't
+ * select at all. But a `transform` on the shadow HOST becomes the
+ * containing block for a `position: fixed` descendant even across the
+ * shadow boundary, so shifting this host's own top edge down shifts the
+ * button's calc(50vh - 20px) anchor down with it — nudging it a little
+ * lower without touching its horizontal position at all.
+ */
+#vlibras-access-wrapper {
+  position: fixed !important;
+  top: 45px !important;
+  right: 0 !important;
+  left: 0 !important;
+  bottom: auto !important;
+  height: 0 !important;
+  transform: translateZ(0);
+}
