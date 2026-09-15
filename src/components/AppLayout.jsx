@@ -58,7 +58,7 @@ export default function AppLayout() {
     <div className="min-h-screen pb-20 sm:pb-0">
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:hidden dark:border-slate-800 dark:bg-slate-900">
         <img src="../../public/logo_extendida.png" alt="extended_logo" className='h-9 w-auto dark:hidden'/>
-        <img src="../../public/logo_extendida_dark.png" alt="extended_logo" className='hidden h-9 w-auto dark:block'/>
+        <img src="../../public/logo_extendida_dark.png" alt="extended_logo_dark" className='hidden h-9 w-auto dark:block'/>
         <div className="flex items-center gap-1">
           <ThemeToggle />
           <NavLink to="/configuracoes" aria-label="Configurações" className={iconLinkClass}>
@@ -78,7 +78,7 @@ export default function AppLayout() {
       <nav aria-label="Principal" className="sticky top-0 z-30 hidden border-b border-slate-200 bg-white sm:block dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
           <img src="../../public/logo_extendida.png" alt="extended_logo" className='h-14 w-auto dark:hidden'/>
-          <img src="../../public/logo_extendida_dark.png" alt="extended_logo" className='hidden h-14 w-auto dark:block'/>
+          <img src="../../public/logo_extendida_dark.png" alt="extended_logo_dark" className='hidden h-14 w-auto dark:block'/>
           <div className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => (
               <NavLink key={item.to} to={item.to} className={topLinkClass}>
