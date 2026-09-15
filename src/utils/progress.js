@@ -52,9 +52,14 @@ export function getCategoryProgress(categoryKey, aluno, certificados) {
   return toProgress(validatedHours, pendingHours, requiredHours)
 }
 
-/** Certificates confirmed by a professor — the only ones that count toward progress or a report. */
+/** Certificates confirmed by a professor — the only ones that count toward the official validated-hours total. */
 export function getValidatedCertificates(certificados) {
   return certificados.filter((c) => c.status === 'validado')
+}
+
+/** Certificates awaiting a professor's decision — shown in the report alongside validated ones, but not yet counted. */
+export function getPendingCertificates(certificados) {
+  return certificados.filter((c) => c.status === 'pendente')
 }
 
 /**

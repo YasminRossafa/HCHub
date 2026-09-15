@@ -2,13 +2,13 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Certificate images: only the owning student can write, and (for now)
-    // only they can read. TODO(professor-access): once the professor panel
-    // is built, widen `allow read` to also permit a request presenting a
-    // valid shareLinks/{token} for this uid — note that Storage download
-    // URLs already carry a bypass token once issued (getDownloadURL()), so
-    // the real access control for that flow has to happen before a token is
-    // ever handed out, not just here.
+    // Certificate images: only the owning student can write or read through
+    // the SDK. The professor panel never talks to Storage directly — it
+    // receives each certificate's `anexoUrl` from the getStudentReportByToken
+    // Cloud Function, and that is a getDownloadURL() link, which carries its
+    // own bypass token and works without auth. Access control for the
+    // professor flow therefore lives in the Cloud Function (it only hands out
+    // URLs for the student the share token resolves to), not here.
     match /certificados/{uid}/{fileName} {
       allow write: if request.auth != null && request.auth.uid == uid;
       allow read: if request.auth != null && request.auth.uid == uid;
