@@ -1,4 +1,4 @@
-import { ChevronDown, FileDown, FileText, Info, Link2, Mail } from 'lucide-react'
+import { ChevronDown, FileArchive, FileDown, FileText, Info, Link2, Mail } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import Button from '../components/Button'
 import CategoryCard from '../components/CategoryCard'
@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { getCertificates } from '../firebase/certificateService'
 import { createShareLink, getActiveShareLink } from '../firebase/shareLinkService'
 import { getCategoryCardSpanClassName, getCategoryGridClassName } from '../utils/categoryGrid'
+import { downloadBlob, generateCertificatesZip } from '../utils/certificateZip'
 import { formatDate } from '../utils/date'
 import { isMobileDevice } from '../utils/device'
 import { buildGmailComposeUrl, buildMailtoUrl } from '../utils/email'
@@ -26,6 +27,7 @@ import {
   getSubcategoryBreakdown,
   getValidatedCertificates,
 } from '../utils/progress'
+import { slugify } from '../utils/text'
 
 /** e.g. "1 certificado validado · 2 pendentes de validação" — whichever counts are nonzero, joined. */
 function buildInclusionSummary(validatedCount, pendingCount) {
@@ -100,6 +102,9 @@ export default function Report() {
 
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
   const [pdfError, setPdfError] = useState(null)
+  const [isGeneratingZip, setIsGeneratingZip] = useState(false)
+  const [zipError, setZipError] = useState(null)
+  const [zipPartialMessage, setZipPartialMessage] = useState(null)
   const [shareResult, setShareResult] = useState(null)
   const [isLoadingShareLink, setIsLoadingShareLink] = useState(true)
   const [isGeneratingLink, setIsGeneratingLink] = useState(false)
@@ -144,6 +149,33 @@ export default function Report() {
       setPdfError('Não foi possível gerar o PDF. Tente novamente.')
     } finally {
       setIsGeneratingPdf(false)
+    }
+  }
+
+  /**
+   * Same reportable set as the PDF (validado + pendente, rejeitado excluded)
+   * but zipped as raw images instead of laid out on paper. A partial failure
+   * (one image's fetch failing) still produces a zip with everything that
+   * succeeded — see utils/certificateZip.js — so the student is told via
+   * `zipPartialMessage` rather than left assuming they got everything.
+   */
+  async function handleDownloadZip() {
+    setIsGeneratingZip(true)
+    setZipError(null)
+    setZipPartialMessage(null)
+    try {
+      const { blob, successCount, total } = await generateCertificatesZip([...validated, ...pending])
+      downloadBlob(blob, `certificados-${slugify(aluno.nome) || 'aluno'}.zip`)
+      if (successCount < total) {
+        setZipPartialMessage(
+          `Baixado com ${successCount} de ${total} certificados — algumas imagens falharam, veja o console.`,
+        )
+      }
+    } catch (err) {
+      console.error(err)
+      setZipError('Não foi possível gerar o arquivo ZIP. Tente novamente.')
+    } finally {
+      setIsGeneratingZip(false)
     }
   }
 
@@ -407,7 +439,7 @@ export default function Report() {
                     {isDetailsOpen ? 'Ocultar detalhes do que será incluído' : 'Relatório'}
                   </span>
 
-                  <div className="pointer-events-none flex items-center gap-3">
+                  <div className="pointer-events-none flex flex-wrap items-center gap-3">
                     <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
                       {buildInclusionSummary(validated.length, pending.length)}
                     </p>
@@ -423,6 +455,18 @@ export default function Report() {
                       <FileDown aria-hidden="true" size={16} />
                       {isGeneratingPdf ? 'Gerando PDF…' : 'Gerar PDF'}
                     </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={handleDownloadZip}
+                      disabled={isGeneratingZip}
+                      aria-busy={isGeneratingZip || undefined}
+                      className="relative pointer-events-auto shrink-0"
+                    >
+                      <FileArchive aria-hidden="true" size={16} />
+                      {isGeneratingZip ? 'Baixando ZIP…' : 'Baixar certificados (ZIP)'}
+                    </Button>
                     <ChevronDown
                       aria-hidden="true"
                       size={20}
@@ -436,6 +480,18 @@ export default function Report() {
                     {pdfError}
                   </p>
                 )}
+
+                {zipError && (
+                  <p role="alert" className="mt-3 text-sm text-rose-600 dark:text-rose-400">
+                    {zipError}
+                  </p>
+                )}
+
+                <div aria-live="polite">
+                  {zipPartialMessage && (
+                    <p className="mt-3 text-sm text-amber-800 dark:text-amber-300">{zipPartialMessage}</p>
+                  )}
+                </div>
 
                 <div id="detalhes-relatorio" hidden={!isDetailsOpen} className="mt-5">
                   <p className="text-sm text-slate-500 dark:text-slate-400">
