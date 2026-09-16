@@ -1,4 +1,5 @@
 import { CATEGORIES_BY_KEY } from '../constants/categories'
+import { getSubcategoryLabel } from '../constants/subcategories'
 import { formatDate } from './date'
 
 const PAGE_WIDTH = 210
@@ -235,7 +236,9 @@ async function addCertificates(doc, certificates, startY, { heading, headingColo
     doc.setFontSize(10)
     doc.setTextColor(...SUBTLE)
     const categoryLabel = CATEGORIES_BY_KEY[cert.categoria]?.label ?? cert.categoria
-    doc.text(`${categoryLabel} · ${cert.cargaHoraria}h · ${formatDate(cert.data)}`, textX, textY)
+    const subcategoryLabel = cert.subcategoria ? getSubcategoryLabel(cert.categoria, cert.subcategoria) : null
+    const categoryPart = subcategoryLabel ? `${categoryLabel} · ${subcategoryLabel}` : categoryLabel
+    doc.text(`${categoryPart} · ${cert.cargaHoraria}h · ${formatDate(cert.data)}`, textX, textY)
 
     y += rowHeight + ROW_GAP
     doc.setDrawColor(241, 245, 249)

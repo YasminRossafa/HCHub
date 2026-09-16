@@ -4,6 +4,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/Button'
 import LoadingState from '../components/LoadingState'
 import { CATEGORIES_BY_KEY } from '../constants/categories'
+import { categoryHasSubcategories, getSubcategoryOptions } from '../constants/subcategories'
 import { useAuth } from '../contexts/AuthContext'
 import { addCertificate, getCertificate, updateCertificate } from '../firebase/certificateService'
 import { todayISO } from '../utils/date'
@@ -20,6 +21,7 @@ export default function CertificateForm() {
 
   const [titulo, setTitulo] = useState('')
   const [categoria, setCategoria] = useState('')
+  const [subcategoria, setSubcategoria] = useState('')
   const [cargaHoraria, setCargaHoraria] = useState('')
   const [data, setData] = useState('')
   const [observacoes, setObservacoes] = useState('')
@@ -63,6 +65,7 @@ export default function CertificateForm() {
         }
         setTitulo(existing.titulo ?? '')
         setCategoria(existing.categoria ?? '')
+        setSubcategoria(existing.subcategoria ?? '')
         setCargaHoraria(String(existing.cargaHoraria ?? ''))
         setData(existing.data ?? '')
         setObservacoes(existing.observacoes ?? '')
@@ -124,6 +127,11 @@ export default function CertificateForm() {
       .finally(() => setIsProcessingFile(false))
   }
 
+  function handleCategoriaChange(value) {
+    setCategoria(value)
+    if (!categoryHasSubcategories(value)) setSubcategoria('')
+  }
+
   function handleRemoveAnexo() {
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current)
@@ -138,6 +146,9 @@ export default function CertificateForm() {
     const nextErrors = {}
     if (!titulo.trim()) nextErrors.titulo = 'Informe o título da atividade.'
     if (!categoria) nextErrors.categoria = 'Selecione uma categoria.'
+    if (categoryHasSubcategories(categoria) && !subcategoria) {
+      nextErrors.subcategoria = 'Selecione o tipo de atividade.'
+    }
 
     const horas = Number(cargaHoraria)
     if (!cargaHoraria || Number.isNaN(horas) || horas <= 0) {
@@ -166,6 +177,7 @@ export default function CertificateForm() {
     const payload = {
       titulo: titulo.trim(),
       categoria,
+      subcategoria: categoryHasSubcategories(categoria) ? subcategoria : '',
       cargaHoraria: Number(cargaHoraria),
       data,
       observacoes: observacoes.trim(),
@@ -227,32 +239,65 @@ export default function CertificateForm() {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="categoria" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Categoria
-                </label>
-                <select
-                  id="categoria"
-                  name="categoria"
-                  value={categoria}
-                  onChange={(e) => setCategoria(e.target.value)}
-                  aria-describedby={errors.categoria ? 'categoria-erro' : undefined}
-                  aria-invalid={Boolean(errors.categoria)}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                >
-                  <option value="" disabled>
-                    Selecione uma categoria
-                  </option>
-                  {categoryOptions.map((category) => (
-                    <option key={category.key} value={category.key}>
-                      {category.label}
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="categoria" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Categoria
+                  </label>
+                  <select
+                    id="categoria"
+                    name="categoria"
+                    value={categoria}
+                    onChange={(e) => handleCategoriaChange(e.target.value)}
+                    aria-describedby={errors.categoria ? 'categoria-erro' : undefined}
+                    aria-invalid={Boolean(errors.categoria)}
+                    className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  >
+                    <option value="" disabled>
+                      Selecione uma categoria
                     </option>
-                  ))}
-                </select>
-                {errors.categoria && (
-                  <p id="categoria-erro" className="text-sm text-rose-600 dark:text-rose-400">
-                    {errors.categoria}
-                  </p>
+                    {categoryOptions.map((category) => (
+                      <option key={category.key} value={category.key}>
+                        {category.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.categoria && (
+                    <p id="categoria-erro" className="text-sm text-rose-600 dark:text-rose-400">
+                      {errors.categoria}
+                    </p>
+                  )}
+                </div>
+
+                {categoryHasSubcategories(categoria) && (
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="subcategoria" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Tipo de atividade
+                    </label>
+                    <select
+                      id="subcategoria"
+                      name="subcategoria"
+                      value={subcategoria}
+                      onChange={(e) => setSubcategoria(e.target.value)}
+                      aria-describedby={errors.subcategoria ? 'subcategoria-erro' : undefined}
+                      aria-invalid={Boolean(errors.subcategoria)}
+                      className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus-visible:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    >
+                      <option value="" disabled>
+                        Selecione o tipo de atividade
+                      </option>
+                      {getSubcategoryOptions(categoria).map((sub) => (
+                        <option key={sub.key} value={sub.key}>
+                          {sub.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.subcategoria && (
+                      <p id="subcategoria-erro" className="text-sm text-rose-600 dark:text-rose-400">
+                        {errors.subcategoria}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 

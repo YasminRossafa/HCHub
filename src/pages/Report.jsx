@@ -18,7 +18,14 @@ import { formatDate } from '../utils/date'
 import { isMobileDevice } from '../utils/device'
 import { buildGmailComposeUrl, buildMailtoUrl } from '../utils/email'
 import { generateReportPdf } from '../utils/pdf'
-import { getActiveCategories, getCategoryProgress, getOverallProgress, getPendingCertificates, getValidatedCertificates } from '../utils/progress'
+import {
+  getActiveCategories,
+  getCategoryProgress,
+  getOverallProgress,
+  getPendingCertificates,
+  getSubcategoryBreakdown,
+  getValidatedCertificates,
+} from '../utils/progress'
 
 /** e.g. "1 certificado validado · 2 pendentes de validação" — whichever counts are nonzero, joined. */
 function buildInclusionSummary(validatedCount, pendingCount) {
@@ -452,6 +459,7 @@ export default function Report() {
                           key={category.key}
                           category={category}
                           progress={entry.progress}
+                          subcategoryBreakdown={getSubcategoryBreakdown(category.key, aluno, certificados)}
                           className={getCategoryCardSpanClassName(activeCategories.length, index)}
                         />
                       )

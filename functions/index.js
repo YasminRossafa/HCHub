@@ -69,6 +69,7 @@ function serializeCertificate(snapshot) {
     id: snapshot.id,
     titulo: data.titulo ?? '',
     categoria: data.categoria ?? '',
+    subcategoria: data.subcategoria ?? '',
     cargaHoraria: Number(data.cargaHoraria) || 0,
     data: data.data ?? '',
     observacoes: data.observacoes ?? '',
