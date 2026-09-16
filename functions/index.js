@@ -75,6 +75,7 @@ function serializeCertificate(snapshot) {
     observacoes: data.observacoes ?? '',
     status: data.status ?? 'pendente',
     anexoUrl: data.anexoUrl ?? null,
+    criadoEm: toIso(data.criadoEm),
     atualizadoEm: toIso(data.atualizadoEm),
   }
 }

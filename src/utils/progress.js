@@ -21,6 +21,21 @@ function sumHours(certificados, predicate) {
   return certificados.filter(predicate).reduce((sum, c) => sum + (Number(c.cargaHoraria) || 0), 0)
 }
 
+/**
+ * Normalizes a certificate timestamp field to milliseconds for sorting,
+ * regardless of shape: a client-SDK Firestore `Timestamp` (has `.toMillis`),
+ * an ISO string (how the professor-panel Cloud Function serializes it), or a
+ * plain `{ seconds, nanoseconds }` object. Missing/unresolved values (e.g. a
+ * `serverTimestamp()` write not yet echoed back) sort first via 0.
+ */
+function timestampMillis(value) {
+  if (!value) return 0
+  if (typeof value.toMillis === 'function') return value.toMillis()
+  if (typeof value === 'string') return new Date(value).getTime() || 0
+  if (typeof value.seconds === 'number') return value.seconds * 1000
+  return 0
+}
+
 function toProgress(validatedHours, pendingHours, requiredHours) {
   const percent = requiredHours > 0 ? Math.min(100, Math.round((validatedHours / requiredHours) * 100)) : 0
   const pendingPercent =
@@ -66,24 +81,38 @@ export function getPendingCertificates(certificados) {
 /**
  * Percentage breakdown of a category's hours by subcategoria, for the "Ver
  * por tipo" control on CategoryCard. Each subcategory's percentage is its
- * share of the category's GOAL — not of the raw registered total — so a
- * student who registers more hours than the goal needs doesn't get an
- * inflated-looking split. This mirrors exactly how the main card's own bar
- * already caps validado at the goal and caps pendente at whatever capacity
- * remains after that:
- *   cappedValidatedHours = min(totalValidatedHours, goal)
- *   remainingCapacityForPending = max(0, goal - totalValidatedHours)
- *   cappedPendingHours = min(totalPendingHours, remainingCapacityForPending)
- * Each subcategory then gets a proportional slice of each capped bucket,
- * sized by its own share of that bucket's raw (uncapped) hours:
- *   subcategoryValidatedPercent = (subcategoryValidatedHours / totalValidatedHours) * (cappedValidatedHours / goal) * 100
- *   subcategoryPendingPercent = (subcategoryPendingHours / totalPendingHours) * (cappedPendingHours / goal) * 100
- * Surplus hours beyond the goal still show up in the row's own raw
- * `validatedHours`/`pendingHours` (never capped — only the percent/bar-fill
- * is), they just contribute no extra percentage once the goal capacity
- * they'd occupy is exhausted. Summed across every row (including "Não
- * especificado"), `percent + pendingPercent` equals what the main overall
- * bar already shows: `(cappedValidatedHours + cappedPendingHours) / goal * 100`.
+ * share of the category's GOAL, allocated by a FIFO walk over every
+ * validado/pendente certificate in the category — not a proportional split
+ * of raw totals — so that which certificates actually claimed the goal's
+ * capacity (and in what order) determines the split, not just the final
+ * validado/pendente head-count. This is what makes two subcategories that
+ * are BOTH validado (one validated before the goal was reached, the other
+ * validated after — see the example below) still split correctly instead
+ * of reverting to a flat proportional share.
+ *
+ * Processing order: every validado certificate (ordered by `atualizadoEm` —
+ * when a professor's decision actually wrote that status, since editing a
+ * certificate always resets it to "pendente" for re-review, so a validado
+ * certificate's `atualizadoEm` can only ever be its validation moment) comes
+ * before every pendente certificate (ordered by `criadoEm`, i.e. registration
+ * order — the closest thing to a queue position for hours not yet decided).
+ * A running `remainingCapacity` starts at the goal; each certificate in turn
+ * claims `min(cargaHoraria, remainingCapacity)` of it, attributed to its
+ * subcategoria (or "Não especificado"), and `remainingCapacity` drops by
+ * that amount — so once it hits 0, every later certificate (including any
+ * still-pending ones) claims nothing further.
+ *
+ * Example: goal 100h. "Não especificado" 60h validado (validated first).
+ * "Projetos de Extensão" also becomes 60h validado (validated second, so
+ * total validado is 120h > goal). FIFO walk: Não especificado claims 60h of
+ * capacity (remaining 40h left), Projetos then claims only 40h of its own
+ * 60h (capacity exhausted) — so the split is 60%/40%, matching validation
+ * order, not a 50/50 split of the raw 60h/60h totals.
+ *
+ * Only the percent/bar-fill uses this capped, order-dependent allocation —
+ * each row's plain `validatedHours`/`pendingHours` (used for its "Xh
+ * validadas"/"Yh pendentes" text) stay the TRUE raw hours the student
+ * registered, uncapped and independent of ordering.
  *
  * Returns:
  *   - `null` if this category has no subcategories at all (control hidden)
@@ -102,36 +131,51 @@ export function getSubcategoryBreakdown(categoryKey, aluno, certificados) {
   const relevant = certificados.filter((c) => c.categoria === categoryKey && c.status !== 'rejeitado')
   if (goal <= 0 || relevant.length === 0) return []
 
-  const hoursByKey = new Map()
+  // Raw, uncapped hours per subcategory — only ever used for a row's display text.
+  const rawByKey = new Map()
   for (const cert of relevant) {
     const key = cert.subcategoria || null
-    const bucket = hoursByKey.get(key) ?? { validatedHours: 0, pendingHours: 0 }
+    const bucket = rawByKey.get(key) ?? { validatedHours: 0, pendingHours: 0 }
     const hours = Number(cert.cargaHoraria) || 0
     if (cert.status === 'validado') bucket.validatedHours += hours
     else bucket.pendingHours += hours
-    hoursByKey.set(key, bucket)
+    rawByKey.set(key, bucket)
   }
 
-  const totalValidatedHours = sumHours(relevant, (c) => c.status === 'validado')
-  const totalPendingHours = sumHours(relevant, (c) => c.status === 'pendente')
-  const cappedValidatedHours = Math.min(totalValidatedHours, goal)
-  const remainingCapacityForPending = Math.max(0, goal - totalValidatedHours)
-  const cappedPendingHours = Math.min(totalPendingHours, remainingCapacityForPending)
+  // FIFO allocation against the goal: validado certificates (by validation
+  // order) fully precede pendente ones (by registration order).
+  const ordered = [
+    ...relevant.filter((c) => c.status === 'validado').sort((a, b) => timestampMillis(a.atualizadoEm) - timestampMillis(b.atualizadoEm)),
+    ...relevant.filter((c) => c.status === 'pendente').sort((a, b) => timestampMillis(a.criadoEm) - timestampMillis(b.criadoEm)),
+  ]
+
+  const countedByKey = new Map()
+  let remainingCapacity = goal
+  for (const cert of ordered) {
+    const key = cert.subcategoria || null
+    const countedHours = Math.max(0, Math.min(Number(cert.cargaHoraria) || 0, remainingCapacity))
+    remainingCapacity -= countedHours
+    const bucket = countedByKey.get(key) ?? { validatedHours: 0, pendingHours: 0 }
+    bucket[cert.status === 'validado' ? 'validatedHours' : 'pendingHours'] += countedHours
+    countedByKey.set(key, bucket)
+  }
 
   const rows = getSubcategoryOptions(categoryKey)
-    .filter((option) => hoursByKey.has(option.key))
-    .map((option) => ({ key: option.key, label: option.label, ...hoursByKey.get(option.key) }))
+    .filter((option) => rawByKey.has(option.key))
+    .map((option) => ({ key: option.key, label: option.label, ...rawByKey.get(option.key) }))
 
-  if (hoursByKey.has(null)) {
-    rows.push({ key: '__unspecified__', label: 'Não especificado', ...hoursByKey.get(null) })
+  if (rawByKey.has(null)) {
+    rows.push({ key: '__unspecified__', label: 'Não especificado', ...rawByKey.get(null) })
   }
 
   return rows.map((row) => {
-    const validatedPercent =
-      totalValidatedHours > 0 ? (row.validatedHours / totalValidatedHours) * (cappedValidatedHours / goal) * 100 : 0
-    const pendingPercent =
-      totalPendingHours > 0 ? (row.pendingHours / totalPendingHours) * (cappedPendingHours / goal) * 100 : 0
-    return { ...row, percent: Math.round(validatedPercent), pendingPercent: Math.round(pendingPercent) }
+    const bucketKey = row.key === '__unspecified__' ? null : row.key
+    const counted = countedByKey.get(bucketKey) ?? { validatedHours: 0, pendingHours: 0 }
+    return {
+      ...row,
+      percent: Math.round((counted.validatedHours / goal) * 100),
+      pendingPercent: Math.round((counted.pendingHours / goal) * 100),
+    }
   })
 }
 
