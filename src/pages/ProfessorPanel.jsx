@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import AppHeader from '../components/AppHeader'
 import Button from '../components/Button'
 import CategoryCard from '../components/CategoryCard'
 import ChipRadio from '../components/ChipRadio'
@@ -18,7 +19,6 @@ import ExpandableCertificateImage from '../components/ExpandableCertificateImage
 import LoadingState from '../components/LoadingState'
 import OverallProgressHero from '../components/OverallProgressHero'
 import StatusBadge from '../components/StatusBadge'
-import ThemeToggle from '../components/ThemeToggle'
 import { CATEGORIES_BY_KEY } from '../constants/categories'
 import { CERTIFICATE_STATUS_CONFIG } from '../constants/statusConfig'
 import {
@@ -234,12 +234,7 @@ function PanelShell({ studentName, children }) {
           Painel do professor{studentName ? ` — validação de certificados de ${studentName}` : ''}
         </span>
       </div>
-      <nav aria-label="Principal" className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-          <span className="text-lg font-bold text-slate-900 dark:text-slate-100">HCHub</span>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <AppHeader />
       {children}
     </div>
   )
