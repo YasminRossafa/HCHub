@@ -1,7 +1,7 @@
-import { ClipboardList, FileText, LayoutDashboard, LogOut, PlusCircle, Settings } from 'lucide-react'
+import { ClipboardList, FileText, LayoutDashboard, PlusCircle, Settings } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { signOut } from '../firebase/authService'
-import ThemeToggle from './ThemeToggle'
+import AppHeader from './AppHeader'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Painel', icon: LayoutDashboard },
@@ -9,6 +9,8 @@ const NAV_ITEMS = [
   { to: '/historico', label: 'Histórico', icon: ClipboardList },
   { to: '/relatorio', label: 'Relatório', icon: FileText },
 ]
+
+const SETTINGS_LINK = { to: '/configuracoes', label: 'Configurações', icon: Settings }
 
 async function handleLogout() {
   try {
@@ -18,25 +20,9 @@ async function handleLogout() {
   }
 }
 
-function topLinkClass({ isActive }) {
-  return `flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
-    isActive
-      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
-      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
-  }`
-}
-
 function bottomLinkClass({ isActive }) {
   return `flex min-h-14 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
     isActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
-  }`
-}
-
-function iconLinkClass({ isActive }) {
-  return `flex items-center justify-center rounded-xl p-2.5 transition-colors ${
-    isActive
-      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
-      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
   }`
 }
 
@@ -56,52 +42,7 @@ function iconLinkClass({ isActive }) {
 export default function AppLayout() {
   return (
     <div className="min-h-screen pb-20 sm:pb-0">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:hidden dark:border-slate-800 dark:bg-slate-900">
-        <img src="/logo.png" alt="logo" className='h-10 w-auto dark:hidden'/>
-        <img src="/logo_dark.png" alt="logo_dark" className='hidden h-10 w-auto dark:block'/>
-        <div className="flex items-center gap-1">
-          <ThemeToggle />
-          <NavLink to="/configuracoes" aria-label="Configurações" className={iconLinkClass}>
-            <Settings aria-hidden="true" size={20} />
-          </NavLink>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-          >
-            <LogOut aria-hidden="true" size={18} />
-            Sair
-          </button>
-        </div>
-      </header>
-
-      <nav aria-label="Principal" className="sticky top-0 z-30 hidden border-b border-slate-200 bg-white sm:block dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-          <img src="/logo_extendida.png" alt="extended_logo" className='h-14 w-auto dark:hidden'/>
-          <img src="/logo_extendida_dark.png" alt="extended_logo_dark" className='hidden h-14 w-auto dark:block'/>
-          <div className="flex items-center gap-1">
-            {NAV_ITEMS.map((item) => (
-              <NavLink key={item.to} to={item.to} className={topLinkClass}>
-                <item.icon aria-hidden="true" size={18} />
-                {item.label}
-              </NavLink>
-            ))}
-            <NavLink to="/configuracoes" className={topLinkClass}>
-              <Settings aria-hidden="true" size={18} />
-              Configurações
-            </NavLink>
-            <ThemeToggle className="ml-2" />
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="ml-2 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-            >
-              <LogOut aria-hidden="true" size={18} />
-              Sair
-            </button>
-          </div>
-        </div>
-      </nav>
+      <AppHeader navLinks={NAV_ITEMS} settingsLink={SETTINGS_LINK} onLogout={handleLogout} />
 
       <Outlet />
 

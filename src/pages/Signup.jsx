@@ -1,4 +1,3 @@
-import { GraduationCap } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AccountLinkDialog from '../components/AccountLinkDialog'
@@ -99,7 +98,8 @@ export default function Signup() {
       <div className="mt-4 rounded-3xl bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-100 sm:p-10 dark:bg-slate-900 dark:shadow-none dark:ring-slate-800">
         <div className="flex items-center gap-3">
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950">
-            <GraduationCap aria-hidden="true" className="text-emerald-600 dark:text-emerald-400" size={26} />
+            <img src="/logo.png" alt="" aria-hidden="true" className="h-8 w-8 object-contain dark:hidden" />
+            <img src="/logo_dark.png" alt="" aria-hidden="true" className="hidden h-8 w-8 object-contain dark:block" />
           </span>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Criar conta no HCHub</h1>
         </div>
