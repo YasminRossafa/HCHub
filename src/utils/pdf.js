@@ -1,6 +1,8 @@
 import { CATEGORIES_BY_KEY } from '../constants/categories'
 import { getSubcategoryLabel } from '../constants/subcategories'
 import { formatDate } from './date'
+import { fetchCertificateImageBlob } from './imageFetch'
+import { slugify } from './text'
 
 const PAGE_WIDTH = 210
 const PAGE_HEIGHT = 297
@@ -140,17 +142,7 @@ function blobToDataUrl(blob) {
  * a vague error here would have made this exact bug unfixable again.
  */
 async function fetchAsDataUrl(url) {
-  let response
-  try {
-    response = await fetch(url)
-  } catch (networkError) {
-    // The browser collapses a CORS rejection, an offline connection, and a
-    // DNS failure into the same generic "Failed to fetch" with no further
-    // detail — that ambiguity is exactly why this can't be swallowed.
-    throw new Error(`network error while fetching the image, possibly CORS or connectivity — "${networkError.message}"`)
-  }
-  if (!response.ok) throw new Error(`server responded ${response.status} ${response.statusText}`)
-  const blob = await response.blob()
+  const blob = await fetchCertificateImageBlob(url)
   return blobToDataUrl(blob)
 }
 
@@ -284,11 +276,6 @@ export async function generateReportPdf({ aluno, overall, categoryBreakdown, val
     })
   }
 
-  const safeName = aluno.nome
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, '-')
+  const safeName = slugify(aluno.nome)
   doc.save(`relatorio-horas-${safeName || 'aluno'}.pdf`)
 }
