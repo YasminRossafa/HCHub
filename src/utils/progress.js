@@ -180,16 +180,34 @@ export function getSubcategoryBreakdown(categoryKey, aluno, certificados) {
 }
 
 /**
+ * A category can never contribute more to the overall total than its own
+ * goal — surplus hours validated in one category (already shown as
+ * "Completa" on its own card) aren't transferable to another category's
+ * shortfall. Pending hours are capped to whatever goal capacity the
+ * validated hours haven't already claimed, same idea one level up.
+ */
+function capToGoal(validatedHours, pendingHours, requiredHours) {
+  const cappedValidated = Math.min(validatedHours, requiredHours)
+  const remainingCapacity = Math.max(0, requiredHours - validatedHours)
+  const cappedPending = Math.min(pendingHours, remainingCapacity)
+  return { cappedValidated, cappedPending }
+}
+
+/**
  * Validated and pending hours across every active category (goal > 0),
  * against the sum of their goals. A zeroed-out category contributes nothing
- * here, the same way it renders no card on the Dashboard.
+ * here, the same way it renders no card on the Dashboard. Each category's
+ * contribution is capped to its own goal (see capToGoal) — this is what
+ * keeps a category validated well past its goal from inflating the overall
+ * total beyond what it could ever actually require.
  */
 export function getOverallProgress(aluno, certificados) {
   const totals = getActiveCategories(aluno).reduce(
     (acc, category) => {
       const { validatedHours, pendingHours, requiredHours } = getCategoryProgress(category.key, aluno, certificados)
-      acc.validatedHours += validatedHours
-      acc.pendingHours += pendingHours
+      const { cappedValidated, cappedPending } = capToGoal(validatedHours, pendingHours, requiredHours)
+      acc.validatedHours += cappedValidated
+      acc.pendingHours += cappedPending
       acc.requiredHours += requiredHours
       return acc
     },
