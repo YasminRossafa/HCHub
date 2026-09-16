@@ -57,11 +57,13 @@ export default function CategoryCard({ category, progress, subcategoryBreakdown 
       </div>
 
       <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-        <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{validatedHours}h</span> validadas
+        <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{validatedHours}h</span>
+        {hasPending ? ' validadas' : ` de ${requiredHours}h validadas`}
         {hasPending && (
           <>
             {' + '}
-            <span className="font-semibold text-amber-800 dark:text-amber-300">{pendingHours}h</span> pendentes
+            <span className="font-semibold text-amber-800 dark:text-amber-300">{pendingHours}h</span> pendentes de{' '}
+            {requiredHours}h necessárias
           </>
         )}
       </p>
