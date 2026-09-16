@@ -28,7 +28,7 @@ import {
 } from '../firebase/professorService'
 import { getCategoryCardSpanClassName, getCategoryGridClassName } from '../utils/categoryGrid'
 import { formatDate } from '../utils/date'
-import { getActiveCategories, getCategoryProgress, getOverallProgress } from '../utils/progress'
+import { getActiveCategories, getCategoryProgress, getOverallProgress, getSubcategoryBreakdown } from '../utils/progress'
 
 const STATUS_FILTERS = [
   { value: 'todos', label: 'Todos' },
@@ -425,6 +425,7 @@ export default function ProfessorPanel() {
                 key={category.key}
                 category={category}
                 progress={getCategoryProgress(category.key, student, certificados)}
+                subcategoryBreakdown={getSubcategoryBreakdown(category.key, student, certificados)}
                 className={getCategoryCardSpanClassName(activeCategories.length, index)}
               />
             ))}

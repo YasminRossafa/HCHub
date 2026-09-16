@@ -10,7 +10,7 @@ import OverallProgressHero from '../components/OverallProgressHero'
 import { useAuth } from '../contexts/AuthContext'
 import { getCertificates } from '../firebase/certificateService'
 import { getCategoryCardSpanClassName, getCategoryGridClassName } from '../utils/categoryGrid'
-import { getActiveCategories, getCategoryProgress, getOverallProgress } from '../utils/progress'
+import { getActiveCategories, getCategoryProgress, getOverallProgress, getSubcategoryBreakdown } from '../utils/progress'
 
 export default function Dashboard() {
   const { studentProfile: aluno, user } = useAuth()
@@ -79,6 +79,7 @@ export default function Dashboard() {
                     key={category.key}
                     category={category}
                     progress={getCategoryProgress(category.key, aluno, certificados)}
+                    subcategoryBreakdown={getSubcategoryBreakdown(category.key, aluno, certificados)}
                     className={getCategoryCardSpanClassName(activeCategories.length, index)}
                   />
                 ))}

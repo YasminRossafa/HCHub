@@ -1,6 +1,7 @@
 import {
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -9,6 +10,7 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { categoryHasSubcategories } from '../constants/subcategories'
 import { db, storage } from './config'
 
 /**
@@ -33,8 +35,13 @@ function toCertificate(snapshot) {
   return { id: snapshot.id, ...snapshot.data() }
 }
 
+/**
+ * `subcategoria` is only included when `categoria` is one that actually has
+ * subcategories (see constants/subcategories) — for any other category it's
+ * simply omitted here, so a fresh certificate never gets the field at all.
+ */
 function sanitizePayload(data) {
-  return {
+  const payload = {
     titulo: data.titulo ?? '',
     categoria: data.categoria ?? '',
     cargaHoraria: Number(data.cargaHoraria) || 0,
@@ -42,6 +49,10 @@ function sanitizePayload(data) {
     observacoes: data.observacoes ?? '',
     status: data.status ?? 'pendente',
   }
+  if (categoryHasSubcategories(payload.categoria)) {
+    payload.subcategoria = data.subcategoria ?? ''
+  }
+  return payload
 }
 
 async function uploadCertificateImage(uid, certId, imageFile) {
@@ -84,6 +95,12 @@ export async function addCertificate(uid, data, imageFile) {
 export async function updateCertificate(uid, certId, data, newImageFile) {
   const certRef = doc(certificatesCollection(uid), certId)
   const payload = { ...sanitizePayload(data), atualizadoEm: serverTimestamp() }
+  // Editing away from a category that has subcategories must not leave a
+  // stale `subcategoria` behind — sanitizePayload only omits the field for a
+  // fresh write, so an existing value needs an explicit delete here.
+  if (!categoryHasSubcategories(data.categoria)) {
+    payload.subcategoria = deleteField()
+  }
   if (newImageFile) {
     payload.anexoUrl = await uploadCertificateImage(uid, certId, newImageFile)
   }

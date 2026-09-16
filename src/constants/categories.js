@@ -8,6 +8,12 @@ import { Award, Briefcase, FlaskConical, HandHeart } from 'lucide-react'
  * All `text` shades are chosen to meet WCAG AA (4.5:1) on a white background,
  * and `solid` shades meet AA (3:1+) for icons/large text on their own fill.
  */
+// Extensão and Atividades Complementares are deliberately consecutive here
+// (and first) — they're the only two categories with subcategories/the "Ver
+// por tipo" breakdown, and CategoryCard grids (Dashboard, Report, Professor
+// panel) render CATEGORIES/getActiveCategories in this exact array order, so
+// keeping them first keeps them adjacent (same row) at every visible-count
+// grid layout in utils/categoryGrid.js.
 export const CATEGORIES = [
   {
     key: 'extensao',
@@ -21,8 +27,19 @@ export const CATEGORIES = [
     defaultGoal: 100,
   },
   {
-    key: 'iniciacaoCientifica',
-    label: 'Iniciação Científica',
+    key: 'atividadesComplementares',
+    label: 'Atividades Complementares',
+    color: 'indigo',
+    text: 'text-indigo-700 dark:text-indigo-300',
+    solidBg: 'bg-indigo-600 dark:bg-indigo-500',
+    softBg: 'bg-indigo-50 dark:bg-indigo-950',
+    ring: 'ring-indigo-200 dark:ring-indigo-800/60',
+    icon: Award,
+    defaultGoal: 40,
+  },
+  {
+    key: 'pesquisa',
+    label: 'Pesquisa',
     color: 'teal',
     text: 'text-teal-700 dark:text-teal-300',
     solidBg: 'bg-teal-600 dark:bg-teal-500',
@@ -41,17 +58,6 @@ export const CATEGORIES = [
     ring: 'ring-rose-200 dark:ring-rose-800/60',
     icon: Briefcase,
     defaultGoal: 100,
-  },
-  {
-    key: 'atividadesComplementares',
-    label: 'Atividades Complementares',
-    color: 'indigo',
-    text: 'text-indigo-700 dark:text-indigo-300',
-    solidBg: 'bg-indigo-600 dark:bg-indigo-500',
-    softBg: 'bg-indigo-50 dark:bg-indigo-950',
-    ring: 'ring-indigo-200 dark:ring-indigo-800/60',
-    icon: Award,
-    defaultGoal: 40,
   },
 ]
 
